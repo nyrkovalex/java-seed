@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  *     Flow.start(() -> first.thing(), "first step")
  *          .then(() -> second.thing(), "second step")
- *           .end(() -> first.thing(), "last step");
+ *           .end(() -> last.thing(), "last step");
  * </pre>
  *
  * @see com.github.nyrkovalex.seed.core.flow.Flow.Step
