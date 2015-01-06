@@ -10,6 +10,8 @@ import static org.hamcrest.CoreMatchers.is;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Seed {
+    // This class is factored out to standalone module to be used as a dependency with `test` scope
+
     private Seed() {}
 
     /**

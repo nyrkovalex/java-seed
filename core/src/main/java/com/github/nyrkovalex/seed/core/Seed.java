@@ -102,6 +102,16 @@ public final class Seed {
         }
 
         /**
+         * Shorthand for the <code>Files.exists(Paths.get(path))</code>
+         *
+         * @param path path to check
+         * @return <code>true</code> if file or directory exists
+         */
+        public static boolean exists(String path) {
+            return java.nio.file.Files.exists(Paths.get(path));
+        }
+
+        /**
          * Deletes target file or directory with its contents, just like <code>rm -rf</code> would
          *
          * @param path file or directory path to delete
