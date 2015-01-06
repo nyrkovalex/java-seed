@@ -42,6 +42,7 @@ public final class Seed {
 
         /**
          * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided
+         *
          * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
          * @param clazz apply such settings to target class' package and its children
          * @param formatter formatter to be used for all loggers
