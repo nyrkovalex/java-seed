@@ -8,9 +8,7 @@ import java.util.logging.Logger;
 /**
  * <p>Continuous process abstraction. Chain represents a sequence of {@link Chain.Step}s executed in the FIFO order
  * only if previous step succeeded i.e. no Exception was thrown.</p>
- * <p>
  * <p>{@link Chain.Step}s are considered unrelated and share no context.</p>
- * <p>
  * <pre>
  *     // Example usage:
  *
@@ -21,60 +19,53 @@ import java.util.logging.Logger;
  *
  * @see Chain.Step
  */
-@SuppressWarnings("UnusedDeclaration")
 public class Chain {
     private static final Logger LOG = Logger.getLogger(Chain.class.getName());
 
-    private final List<StepDescription> steps;
+    private final List<Step> steps;
 
-    private Chain(Step firstStep, String description) {
+    private Chain(Step firstStep) {
         steps = new ArrayList<>();
-        addStep(firstStep, description);
+        addStep(firstStep);
     }
 
     /**
      * Starts a chain construction with a given step
      *
-     * @param firstStep   starting step
-     * @param description step description
+     * @param firstStep starting step
      * @return {@link Chain} being constructed
      */
-    public static Chain start(Step firstStep, String description) {
-        return new Chain(firstStep, description);
+    public static Chain start(Step firstStep) {
+        return new Chain(firstStep);
     }
 
     /**
      * Adds a step to the chain
      *
-     * @param nextStep    following step
-     * @param description step description
+     * @param nextStep following step
      * @return {@link Chain} being constructed
      */
-    public Chain then(Step nextStep, String description) {
-        addStep(nextStep, description);
+    public Chain then(Step nextStep) {
+        addStep(nextStep);
         return this;
     }
 
-    private void addStep(Step step, String description) {
-        steps.add(new StepDescription(step, description));
+    private void addStep(Step step) {
+        steps.add(step);
     }
 
     /**
-     * Finishes a chain construction with a given step and runs the chain.
+     * Finishes a chain construction and runs the chain.
      *
-     * @param lastStep    finishing step
-     * @param description step description
-     * @throws ChainInterruptedException if some step fails. See the cause for details
+     * @throws Chain.BrokenException if some step fails. See the cause for details
      */
-    public void end(Step lastStep, String description) throws ChainInterruptedException {
+    public void end() throws Chain.BrokenException {
         LOG.fine(() -> "Starting chain");
-        addStep(lastStep, description);
-        for (StepDescription s : steps) {
+        for (Step s : steps) {
             try {
-                LOG.fine(() -> "Running step " + s.description);
-                s.step.run();
+                s.call();
             } catch (Exception e) {
-                throw new ChainInterruptedException(s.description, e);
+                throw new Chain.BrokenException(s, e);
             }
         }
         LOG.fine(() -> "Chain successfully completed");
@@ -93,16 +84,12 @@ public class Chain {
          *
          * @throws Exception if something goes wrong which interrupts the chain
          */
-        void run() throws Exception;
+        void call() throws Exception;
     }
 
-    private static class StepDescription {
-        private final Step step;
-        private final String description;
-
-        private StepDescription(Step step, String description) {
-            this.step = step;
-            this.description = description;
+    public static class BrokenException extends Exception {
+        private BrokenException(Step s, Throwable cause) {
+            super(String.format("Chain broken. Step %s failed", s), cause);
         }
     }
 }
