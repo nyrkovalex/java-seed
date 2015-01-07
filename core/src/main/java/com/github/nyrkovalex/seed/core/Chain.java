@@ -12,9 +12,10 @@ import java.util.logging.Logger;
  * <pre>
  * // Example usage:
  *
- * Chain.start(() -> first.thing(), "first step")
- *       .then(() -> second.thing(), "second step")
- *        .end(() -> last.thing(), "last step");
+ * Chain.start(first::thing())
+ *       .then(() -> second.thing(someInput))
+ *       .then(last::thing)
+ *       .end();
  * </pre>
  *
  * @see com.github.nyrkovalex.seed.core.Chain.Callable
