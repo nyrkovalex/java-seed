@@ -1,4 +1,4 @@
-package com.github.nyrkovalex.seed.core.flow;
+package com.github.nyrkovalex.seed.core.chain;
 
 
 import java.util.ArrayList;
@@ -6,51 +6,51 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * <p>Continuous process abstraction. Flow represents a sequence of {@link Flow.Step}s executed in the FIFO order
+ * <p>Continuous process abstraction. Chain represents a sequence of {@link Chain.Step}s executed in the FIFO order
  * only if previous step succeeded i.e. no Exception was thrown.</p>
  * <p>
- * <p>{@link Flow.Step}s are considered unrelated and share no context.</p>
+ * <p>{@link Chain.Step}s are considered unrelated and share no context.</p>
  * <p>
  * <pre>
  *     // Example usage:
  *
- *     Flow.start(() -> first.thing(), "first step")
- *          .then(() -> second.thing(), "second step")
- *           .end(() -> last.thing(), "last step");
+ *     Chain.start(() -> first.thing(), "first step")
+ *           .then(() -> second.thing(), "second step")
+ *            .end(() -> last.thing(), "last step");
  * </pre>
  *
- * @see com.github.nyrkovalex.seed.core.flow.Flow.Step
+ * @see Chain.Step
  */
 @SuppressWarnings("UnusedDeclaration")
-public class Flow {
-    private static final Logger LOG = Logger.getLogger(Flow.class.getName());
+public class Chain {
+    private static final Logger LOG = Logger.getLogger(Chain.class.getName());
 
     private final List<StepDescription> steps;
 
-    private Flow(Step firstStep, String description) {
+    private Chain(Step firstStep, String description) {
         steps = new ArrayList<>();
         addStep(firstStep, description);
     }
 
     /**
-     * Starts a flow construction with a given step
+     * Starts a chain construction with a given step
      *
      * @param firstStep   starting step
      * @param description step description
-     * @return {@link Flow} being constructed
+     * @return {@link Chain} being constructed
      */
-    public static Flow start(Step firstStep, String description) {
-        return new Flow(firstStep, description);
+    public static Chain start(Step firstStep, String description) {
+        return new Chain(firstStep, description);
     }
 
     /**
-     * Adds a step to the flow
+     * Adds a step to the chain
      *
      * @param nextStep    following step
      * @param description step description
-     * @return {@link Flow} being constructed
+     * @return {@link Chain} being constructed
      */
-    public Flow then(Step nextStep, String description) {
+    public Chain then(Step nextStep, String description) {
         addStep(nextStep, description);
         return this;
     }
@@ -60,30 +60,30 @@ public class Flow {
     }
 
     /**
-     * Finishes a flow construction with a given step and runs the flow.
+     * Finishes a chain construction with a given step and runs the chain.
      *
      * @param lastStep    finishing step
      * @param description step description
-     * @throws com.github.nyrkovalex.seed.core.flow.FlowInterruptedException if some step fails. See the cause for details
+     * @throws ChainInterruptedException if some step fails. See the cause for details
      */
-    public void end(Step lastStep, String description) throws FlowInterruptedException {
-        LOG.fine(() -> "Starting flow");
+    public void end(Step lastStep, String description) throws ChainInterruptedException {
+        LOG.fine(() -> "Starting chain");
         addStep(lastStep, description);
         for (StepDescription s : steps) {
             try {
                 LOG.fine(() -> "Running step " + s.description);
                 s.step.run();
             } catch (Exception e) {
-                throw new FlowInterruptedException(s.description, e);
+                throw new ChainInterruptedException(s.description, e);
             }
         }
-        LOG.fine(() -> "Flow successfully completed");
+        LOG.fine(() -> "Chain successfully completed");
     }
 
     /**
-     * {@link Flow} step. To be used as lambda
+     * {@link Chain} step. To be used as lambda
      *
-     * @see com.github.nyrkovalex.seed.core.flow.Flow
+     * @see Chain
      */
     @FunctionalInterface
     public static interface Step {
@@ -91,7 +91,7 @@ public class Flow {
         /**
          * Does the job and throws if something goes wrong
          *
-         * @throws Exception if something goes wrong which interrupts the flow
+         * @throws Exception if something goes wrong which interrupts the chain
          */
         void run() throws Exception;
     }
