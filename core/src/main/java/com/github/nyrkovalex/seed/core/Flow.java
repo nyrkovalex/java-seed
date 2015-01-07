@@ -1,9 +1,9 @@
-package com.github.nyrkovalex.seed.core.flow;
+package com.github.nyrkovalex.seed.core;
 
 /**
  * Continuous process abstraction where each step depends on previous step's output.
  * For a simple sequential invocation when no data is shared between steps see
- * {@link com.github.nyrkovalex.seed.core.chain.Chain Chain}.
+ * {@link com.github.nyrkovalex.seed.core.Chain Chain}.
  * <pre>
  * // Example usage
  *
@@ -17,21 +17,21 @@ package com.github.nyrkovalex.seed.core.flow;
  * // result.equals("Done!")
  * </pre>
  *
- * @see com.github.nyrkovalex.seed.core.chain.Chain Chain
- * @see com.github.nyrkovalex.seed.core.flow.Flow.FirstStep
- * @see com.github.nyrkovalex.seed.core.flow.Flow.PendingStep
- * @see com.github.nyrkovalex.seed.core.flow.Flow.Invocation
+ * @see com.github.nyrkovalex.seed.core.Chain Chain
+ * @see Flow.FirstStep
+ * @see Flow.PendingStep
+ * @see Flow.Invocation
  */
 public class Flow {
 
     /**
-     * Starts a new flow return {@link com.github.nyrkovalex.seed.core.flow.Flow.Invocation} object. Think of it as a
-     * deferred function call where function is the {@link com.github.nyrkovalex.seed.core.flow.Flow.FirstStep}
+     * Starts a new flow return {@link Flow.Invocation} object. Think of it as a
+     * deferred function call where function is the {@link Flow.FirstStep}
      * provided.
      *
      * @param step step to begin Flow with
-     * @param <O>  type of a result returned by {@link com.github.nyrkovalex.seed.core.flow.Flow.FirstStep#call()}
-     * @return {@link com.github.nyrkovalex.seed.core.flow.Flow.Invocation}
+     * @param <O>  type of a result returned by {@link Flow.FirstStep#call()}
+     * @return {@link Flow.Invocation}
      * object representing continuous flow construction
      */
     public static <O> Invocation<O> start(FirstStep<O> step) {
@@ -39,14 +39,14 @@ public class Flow {
     }
 
     /**
-     * <p>Pending step to be executed in the middle or at te end of a {@link com.github.nyrkovalex.seed.core.flow.Flow}.
+     * <p>Pending step to be executed in the middle or at te end of a {@link Flow}.
      * Can be used as a lambda function.</p>
      * <p>To get more detailed exception output one may want to override its {@link #toString()} method which will be used
-     * in the {@link com.github.nyrkovalex.seed.core.flow.Flow.InterruptedException} message.</p>
+     * in the {@link Flow.InterruptedException} message.</p>
      *
      * @param <I> type of a parameter expected by this step's
-     *            {@link com.github.nyrkovalex.seed.core.flow.Flow.PendingStep#apply(I)} method
-     * @param <O> type of result returned by {@link com.github.nyrkovalex.seed.core.flow.Flow.PendingStep#apply(I)}
+     *            {@link Flow.PendingStep#apply(I)} method
+     * @param <O> type of result returned by {@link Flow.PendingStep#apply(I)}
      */
     @FunctionalInterface
     public static interface PendingStep<I, O> {
@@ -63,13 +63,13 @@ public class Flow {
     }
 
     /**
-     * <p>First step to start {@link com.github.nyrkovalex.seed.core.flow.Flow} with. Expects no input,
+     * <p>First step to start {@link Flow} with. Expects no input,
      * serves just to produce initial data.
      * Can be used as a lambda function.</p>
      * <p>To get more detailed exception output one may want to override its {@link #toString()} method which will be used
-     * in the {@link com.github.nyrkovalex.seed.core.flow.Flow.InterruptedException} message.</p>
+     * in the {@link Flow.InterruptedException} message.</p>
      *
-     * @param <O> type of a result returned by {@link com.github.nyrkovalex.seed.core.flow.Flow.FirstStep#call()}
+     * @param <O> type of a result returned by {@link Flow.FirstStep#call()}
      */
     @FunctionalInterface
     protected static interface FirstStep<O> {
@@ -121,7 +121,7 @@ public class Flow {
     }
 
     /**
-     * Represents a deferred invocation of a {@link com.github.nyrkovalex.seed.core.flow.Flow} step.
+     * Represents a deferred invocation of a {@link Flow} step.
      * Servers as a builder for a flow itself.
      *
      * @param <O> type of an output produced by this invocation
@@ -131,12 +131,12 @@ public class Flow {
 
         /**
          * Connects this step to a downstream one producing a new
-         * {@link com.github.nyrkovalex.seed.core.flow.Flow.Invocation} instance connected with itself.
+         * {@link Flow.Invocation} instance connected with itself.
          *
          * @param nextStep next step to execute down the flow
          * @param <N>      type of next step's output
-         * @return next {@link com.github.nyrkovalex.seed.core.flow.Flow.Invocation} down the
-         * {@link com.github.nyrkovalex.seed.core.flow.Flow} stream
+         * @return next {@link Flow.Invocation} down the
+         * {@link Flow} stream
          */
         public <N> Invocation<N> then(PendingStep<O, N> nextStep) {
             return new PendingInvocation<>(this, nextStep);
@@ -145,9 +145,9 @@ public class Flow {
         /**
          * Ends the flow invoking all the steps in the FIFO order passing each step's output to the downstream step
          *
-         * @return last {@link com.github.nyrkovalex.seed.core.flow.Flow} step output
-         * @throws com.github.nyrkovalex.seed.core.flow.Flow.InterruptedException when something goes wrong up in the
-         *                                                                        {@link com.github.nyrkovalex.seed.core.flow.Flow} you'll probably want to check the cause
+         * @return last {@link Flow} step output
+         * @throws Flow.InterruptedException when something goes wrong up in the
+         *                                                                        {@link Flow} you'll probably want to check the cause
          */
         public O end() throws Flow.InterruptedException {
             return invoke();
@@ -155,10 +155,10 @@ public class Flow {
     }
 
     /**
-     * Thrown when one of the {@link com.github.nyrkovalex.seed.core.flow.Flow} steps fails interrupting the Flow.
+     * Thrown when one of the {@link Flow} steps fails interrupting the Flow.
      * To get more from the exception message one may want to override
-     * {@link com.github.nyrkovalex.seed.core.flow.Flow.FirstStep#toString()} and
-     * {@link com.github.nyrkovalex.seed.core.flow.Flow.PendingStep#toString()} methods
+     * {@link Flow.FirstStep#toString()} and
+     * {@link Flow.PendingStep#toString()} methods
      */
     public static class InterruptedException extends Exception {
         private InterruptedException(String s, Throwable cause) {

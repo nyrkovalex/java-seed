@@ -1,4 +1,4 @@
-package com.github.nyrkovalex.seed.core.chain;
+package com.github.nyrkovalex.seed.core;
 
 import com.github.nyrkovalex.seed.test.Seed;
 import org.junit.Test;
