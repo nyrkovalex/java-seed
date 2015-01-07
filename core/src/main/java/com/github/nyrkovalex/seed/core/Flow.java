@@ -22,7 +22,9 @@ package com.github.nyrkovalex.seed.core;
  * @see com.github.nyrkovalex.seed.core.Flow.Processor
  * @see Flow.Invocation
  */
-public class Flow {
+public final class Flow {
+    private Flow() {
+    }
 
     /**
      * Starts a new flow return {@link Flow.Invocation} object. Think of it as a

@@ -10,16 +10,16 @@ import java.util.logging.Logger;
  * only if previous step succeeded i.e. no Exception was thrown.</p>
  * <p>{@link com.github.nyrkovalex.seed.core.Chain.Callable}s are considered unrelated and share no context.</p>
  * <pre>
- *     // Example usage:
+ * // Example usage:
  *
- *     Chain.start(() -> first.thing(), "first step")
- *           .then(() -> second.thing(), "second step")
- *            .end(() -> last.thing(), "last step");
+ * Chain.start(() -> first.thing(), "first step")
+ *       .then(() -> second.thing(), "second step")
+ *        .end(() -> last.thing(), "last step");
  * </pre>
  *
  * @see com.github.nyrkovalex.seed.core.Chain.Callable
  */
-public class Chain {
+public final class Chain {
     private static final Logger LOG = Logger.getLogger(Chain.class.getName());
 
     private final List<Callable> steps;
