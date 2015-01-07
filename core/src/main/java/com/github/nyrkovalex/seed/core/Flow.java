@@ -72,7 +72,7 @@ public class Flow {
      * @param <O> type of a result returned by {@link Flow.FirstStep#call()}
      */
     @FunctionalInterface
-    protected static interface FirstStep<O> {
+    public static interface FirstStep<O> {
 
         /**
          * Produces output for a downstream step.
