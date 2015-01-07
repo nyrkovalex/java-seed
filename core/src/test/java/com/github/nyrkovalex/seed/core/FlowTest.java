@@ -14,8 +14,8 @@ import static org.mockito.Mockito.when;
 public class FlowTest extends Seed.Test {
 
     private static final String RESULT = "result";
-    @Mock private Flow.PendingStep<Integer, String> step;
-    @Mock private Flow.PendingStep<Integer, Integer> brokenStep;
+    @Mock private Flow.Processor<Integer, String> step;
+    @Mock private Flow.Processor<Integer, Integer> brokenStep;
 
     @Before
     public void setUp() throws Exception {

@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * <p>Continuous process abstraction. Chain represents a sequence of {@link Chain.Step}s executed in the FIFO order
+ * <p>Continuous process abstraction. Chain represents a sequence of {@link com.github.nyrkovalex.seed.core.Chain.Callable}s executed in the FIFO order
  * only if previous step succeeded i.e. no Exception was thrown.</p>
- * <p>{@link Chain.Step}s are considered unrelated and share no context.</p>
+ * <p>{@link com.github.nyrkovalex.seed.core.Chain.Callable}s are considered unrelated and share no context.</p>
  * <pre>
  *     // Example usage:
  *
@@ -17,14 +17,14 @@ import java.util.logging.Logger;
  *            .end(() -> last.thing(), "last step");
  * </pre>
  *
- * @see Chain.Step
+ * @see com.github.nyrkovalex.seed.core.Chain.Callable
  */
 public class Chain {
     private static final Logger LOG = Logger.getLogger(Chain.class.getName());
 
-    private final List<Step> steps;
+    private final List<Callable> steps;
 
-    private Chain(Step firstStep) {
+    private Chain(Callable firstStep) {
         steps = new ArrayList<>();
         addStep(firstStep);
     }
@@ -35,7 +35,7 @@ public class Chain {
      * @param firstStep starting step
      * @return {@link Chain} being constructed
      */
-    public static Chain start(Step firstStep) {
+    public static Chain start(Callable firstStep) {
         return new Chain(firstStep);
     }
 
@@ -45,12 +45,12 @@ public class Chain {
      * @param nextStep following step
      * @return {@link Chain} being constructed
      */
-    public Chain then(Step nextStep) {
+    public Chain then(Callable nextStep) {
         addStep(nextStep);
         return this;
     }
 
-    private void addStep(Step step) {
+    private void addStep(Callable step) {
         steps.add(step);
     }
 
@@ -61,7 +61,7 @@ public class Chain {
      */
     public void end() throws Chain.BrokenException {
         LOG.fine(() -> "Starting chain");
-        for (Step s : steps) {
+        for (Callable s : steps) {
             try {
                 s.call();
             } catch (Exception e) {
@@ -72,12 +72,12 @@ public class Chain {
     }
 
     /**
-     * {@link Chain} step. To be used as lambda
+     * {@link Chain} callable step. To be used as lambda
      *
      * @see Chain
      */
     @FunctionalInterface
-    public static interface Step {
+    public static interface Callable {
 
         /**
          * Does the job and throws if something goes wrong
@@ -88,7 +88,7 @@ public class Chain {
     }
 
     public static class BrokenException extends Exception {
-        private BrokenException(Step s, Throwable cause) {
+        private BrokenException(Callable s, Throwable cause) {
             super(String.format("Chain broken. Step %s failed", s), cause);
         }
     }

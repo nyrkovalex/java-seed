@@ -18,38 +18,38 @@ package com.github.nyrkovalex.seed.core;
  * </pre>
  *
  * @see com.github.nyrkovalex.seed.core.Chain Chain
- * @see Flow.FirstStep
- * @see Flow.PendingStep
+ * @see com.github.nyrkovalex.seed.core.Flow.Producer
+ * @see com.github.nyrkovalex.seed.core.Flow.Processor
  * @see Flow.Invocation
  */
 public class Flow {
 
     /**
      * Starts a new flow return {@link Flow.Invocation} object. Think of it as a
-     * deferred function call where function is the {@link Flow.FirstStep}
+     * deferred function call where function is the {@link com.github.nyrkovalex.seed.core.Flow.Producer}
      * provided.
      *
      * @param step step to begin Flow with
-     * @param <O>  type of a result returned by {@link Flow.FirstStep#call()}
+     * @param <O>  type of a result returned by {@link com.github.nyrkovalex.seed.core.Flow.Producer#call()}
      * @return {@link Flow.Invocation}
      * object representing continuous flow construction
      */
-    public static <O> Invocation<O> start(FirstStep<O> step) {
+    public static <O> Invocation<O> start(Producer<O> step) {
         return new FirstInvocation<>(step);
     }
 
     /**
-     * <p>Pending step to be executed in the middle or at te end of a {@link Flow}.
+     * <p>Processing step to be executed in the middle or at te end of a {@link Flow}.
      * Can be used as a lambda function.</p>
      * <p>To get more detailed exception output one may want to override its {@link #toString()} method which will be used
      * in the {@link Flow.InterruptedException} message.</p>
      *
      * @param <I> type of a parameter expected by this step's
-     *            {@link Flow.PendingStep#apply(I)} method
-     * @param <O> type of result returned by {@link Flow.PendingStep#apply(I)}
+     *            {@link com.github.nyrkovalex.seed.core.Flow.Processor#apply(I)} method
+     * @param <O> type of result returned by {@link com.github.nyrkovalex.seed.core.Flow.Processor#apply(I)}
      */
     @FunctionalInterface
-    public static interface PendingStep<I, O> {
+    public static interface Processor<I, O> {
 
         /**
          * Performes some actions on <code>data</code> relieved from upstream step and produces output for
@@ -63,16 +63,16 @@ public class Flow {
     }
 
     /**
-     * <p>First step to start {@link Flow} with. Expects no input,
+     * <p>Producing step to start {@link Flow} with. Expects no input,
      * serves just to produce initial data.
      * Can be used as a lambda function.</p>
      * <p>To get more detailed exception output one may want to override its {@link #toString()} method which will be used
      * in the {@link Flow.InterruptedException} message.</p>
      *
-     * @param <O> type of a result returned by {@link Flow.FirstStep#call()}
+     * @param <O> type of a result returned by {@link com.github.nyrkovalex.seed.core.Flow.Producer#call()}
      */
     @FunctionalInterface
-    public static interface FirstStep<O> {
+    public static interface Producer<O> {
 
         /**
          * Produces output for a downstream step.
@@ -84,10 +84,10 @@ public class Flow {
     }
 
     private static class PendingInvocation<I, O> extends Invocation<O> {
-        private final PendingStep<I, O> step;
+        private final Processor<I, O> step;
         private final Invocation<I> previous;
 
-        public PendingInvocation(Invocation<I> previous, PendingStep<I, O> step) {
+        public PendingInvocation(Invocation<I> previous, Processor<I, O> step) {
             this.step = step;
             this.previous = previous;
         }
@@ -104,9 +104,9 @@ public class Flow {
 
     private static class FirstInvocation<O> extends Invocation<O> {
 
-        private final FirstStep<O> step;
+        private final Producer<O> step;
 
-        private FirstInvocation(FirstStep<O> step) {
+        private FirstInvocation(Producer<O> step) {
             this.step = step;
         }
 
@@ -138,7 +138,7 @@ public class Flow {
          * @return next {@link Flow.Invocation} down the
          * {@link Flow} stream
          */
-        public <N> Invocation<N> then(PendingStep<O, N> nextStep) {
+        public <N> Invocation<N> then(Processor<O, N> nextStep) {
             return new PendingInvocation<>(this, nextStep);
         }
 
@@ -157,8 +157,8 @@ public class Flow {
     /**
      * Thrown when one of the {@link Flow} steps fails interrupting the Flow.
      * To get more from the exception message one may want to override
-     * {@link Flow.FirstStep#toString()} and
-     * {@link Flow.PendingStep#toString()} methods
+     * {@link com.github.nyrkovalex.seed.core.Flow.Producer#toString()} and
+     * {@link com.github.nyrkovalex.seed.core.Flow.Processor#toString()} methods
      */
     public static class InterruptedException extends Exception {
         private InterruptedException(String s, Throwable cause) {
@@ -166,11 +166,11 @@ public class Flow {
 
         }
 
-        private InterruptedException(FirstStep<?> step, Throwable cause) {
+        private InterruptedException(Producer<?> step, Throwable cause) {
             this(step.toString(), cause);
         }
 
-        private InterruptedException(PendingStep<?, ?> step, Throwable cause) {
+        private InterruptedException(Processor<?, ?> step, Throwable cause) {
             this(step.toString(), cause);
         }
     }

@@ -12,9 +12,9 @@ import static org.mockito.Mockito.verify;
 
 public class ChainTest extends Seed.Test {
 
-    @Mock private Chain.Step firstStep;
-    @Mock private Chain.Step secondStep;
-    @Mock private Chain.Step thirdStep;
+    @Mock private Chain.Callable firstStep;
+    @Mock private Chain.Callable secondStep;
+    @Mock private Chain.Callable thirdStep;
 
     @Test
     public void testShouldExecuteOneStepChain() throws Exception {
