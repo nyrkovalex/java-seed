@@ -1,18 +1,18 @@
 package com.github.nyrkovalex.seed.test;
 
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
-
-import static org.hamcrest.CoreMatchers.is;
 
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Seed {
     // This class is factored out to standalone module to be used as a dependency with `test` scope
 
-    private Seed() {}
+    private Seed() {
+    }
 
     /**
      * This class is used as a base for all unit tests
@@ -47,6 +47,42 @@ public final class Seed {
          */
         public static <T> void assertThat(String reason, T actual, Matcher<? super T> matcher) {
             Assert.assertThat(reason, actual, matcher);
+        }
+
+        /**
+         * Delegates to {@link org.hamcrest.CoreMatchers#is(Object)}.
+         *
+         * @see org.hamcrest.CoreMatchers#is(java.lang.Object)
+         */
+        public static <T> Matcher<T> is(T value) {
+            return CoreMatchers.is(value);
+        }
+
+        /**
+         * Delegates to {@link org.hamcrest.CoreMatchers#is(org.hamcrest.Matcher)}.
+         *
+         * @see org.hamcrest.CoreMatchers#is(org.hamcrest.Matcher)
+         */
+        public static <T> Matcher<T> is(Matcher<T> matcher) {
+            return CoreMatchers.is(matcher);
+        }
+
+        /**
+         * Delegates to {@link org.hamcrest.CoreMatchers#sameInstance(Object)}
+         *
+         * @see org.hamcrest.CoreMatchers#sameInstance(Object)
+         */
+        public static <T> Matcher<T> sameInstance(T target) {
+            return CoreMatchers.sameInstance(target);
+        }
+
+        /**
+         * Delegates to {@link org.hamcrest.CoreMatchers#instanceOf(Class)}
+         *
+         * @see org.hamcrest.CoreMatchers#instanceOf(Class)
+         */
+        public static <T> Matcher<T> instanceOf(Class<?> type) {
+            return CoreMatchers.instanceOf(type);
         }
 
         @Before

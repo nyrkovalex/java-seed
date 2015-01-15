@@ -1,22 +1,30 @@
 package com.github.nyrkovalex.seed.core;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Seed {
-    private Seed() {}
+    private Seed() {
+    }
 
     public static final class Logging {
-        private Logging() {}
+        private Logging() {
+        }
 
         /**
          * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided and
@@ -44,8 +52,8 @@ public final class Seed {
          * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided
          *
          * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
-         * @param clazz apply such settings to target class' package and its children
-         * @param formatter formatter to be used for all loggers
+         * @param clazz        apply such settings to target class' package and its children
+         * @param formatter    formatter to be used for all loggers
          */
         public static void init(boolean debugEnabled, Class<?> clazz, Formatter formatter) {
             init(debugEnabled, clazz.getPackage(), formatter);
@@ -178,6 +186,69 @@ public final class Seed {
                 appendSeparator = true;
             }
             return builder.toString();
+        }
+    }
+
+    /**
+     * Helps to load jars from target directory, e.g. useful for plugin implementation
+     */
+    public static class ClassLoaderProvider {
+
+        private final String path;
+
+        private ClassLoaderProvider(String path) {
+            this.path = path;
+        }
+
+        private static URL pathToUrl(Path p) throws AssertionError {
+            try {
+                return p.toUri().toURL();
+            } catch (MalformedURLException ex) {
+                throw new AssertionError("Should not happen");
+            }
+        }
+
+        private static List<URL> readDirectory(Path directory) {
+            List<URL> urls = new ArrayList<>();
+            safeList(directory).forEach(p -> {
+                if (!java.nio.file.Files.isDirectory(p)) {
+                    urls.add(pathToUrl(p));
+                    return;
+                }
+                urls.addAll(readDirectory(p));
+
+            });
+            return urls;
+        }
+
+        private static Stream<Path> safeList(Path directory) throws IllegalStateException {
+            try {
+                return java.nio.file.Files.list(directory);
+            } catch (IOException ex) {
+                throw new IllegalStateException("Failed to read directory", ex);
+            }
+        }
+
+        /**
+         * Creates a {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} for a given path.
+         *
+         * @param path directory to load classes from
+         * @return {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} capable of loading classes from
+         * a <code>path</code> provided
+         */
+        public static ClassLoaderProvider forPath(String path) {
+            return new ClassLoaderProvider(path);
+        }
+
+        /**
+         * Creates a {@link java.lang.ClassLoader} recursively scanning <code>path</code> directory contents
+         * adding all of the underlying files to its classpath.
+         *
+         * @return {@link java.lang.ClassLoader} for a given directory
+         */
+        public ClassLoader get() {
+            List<URL> plugins = readDirectory(Paths.get(path));
+            return new URLClassLoader(plugins.toArray(new URL[plugins.size()]));
         }
     }
 }
