@@ -34,7 +34,7 @@ public final class Seed {
          * @param clazz        apply such settings to target class' package and its children
          */
         public static void init(boolean debugEnabled, Class<?> clazz) {
-            init(debugEnabled, clazz.getPackage());
+            init(debugEnabled, clazz.getPackage().getName());
         }
 
         /**
@@ -44,7 +44,7 @@ public final class Seed {
          * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
          * @param rootPackage  apply such settings to target package and its children
          */
-        public static void init(boolean debugEnabled, Package rootPackage) {
+        public static void init(boolean debugEnabled, String rootPackage) {
             init(debugEnabled, rootPackage, new DetailedFormatter());
         }
 
@@ -56,7 +56,7 @@ public final class Seed {
          * @param formatter    formatter to be used for all loggers
          */
         public static void init(boolean debugEnabled, Class<?> clazz, Formatter formatter) {
-            init(debugEnabled, clazz.getPackage(), formatter);
+            init(debugEnabled, clazz.getPackage().getName(), formatter);
         }
 
         /**
@@ -66,15 +66,15 @@ public final class Seed {
          * @param rootPackage  apply such settings to target package and its children
          * @param formatter    formatter to be used for all loggers
          */
-        public static void init(boolean debugEnabled, Package rootPackage, Formatter formatter) {
+        public static void init(boolean debugEnabled, String rootPackage, Formatter formatter) {
             Level targetLevel = debugEnabled ? Level.FINEST : Level.INFO;
             Logger rootLogger = Logger.getLogger("");
             for (Handler h : rootLogger.getHandlers()) {
                 h.setLevel(targetLevel);
                 h.setFormatter(formatter);
             }
-            Logger gitdepsLogger = Logger.getLogger(rootPackage.getName());
-            gitdepsLogger.setLevel(targetLevel);
+            Logger logger = Logger.getLogger(rootPackage);
+            logger.setLevel(targetLevel);
         }
 
         /**
@@ -85,7 +85,7 @@ public final class Seed {
             public String format(LogRecord record) {
                 return String.format(
                         "%s [ %s ] - %s: %s\n",
-                        new SimpleDateFormat("YYYY-MM-dd HH:mm:ss:SSS").format(
+                        new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS").format(
                                 new Date(record.getMillis())),
                         record.getLevel(),
                         record.getSourceClassName(),
