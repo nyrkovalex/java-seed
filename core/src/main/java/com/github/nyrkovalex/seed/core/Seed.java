@@ -108,6 +108,17 @@ public final class Seed {
     public static final class Files {
         private Files() {
         }
+        
+        /**
+         * Reads target file contents to a single String
+         * 
+         * @param path target file path
+         * @return target file content as a single String
+         * @throws IOException if something goes wrong
+         */
+        public static String readToString(String path) throws IOException {
+            return new String(java.nio.file.Files.readAllBytes(Paths.get(path)));
+        }
 
         /**
          * Shorthand for the <code>Files.exists(Paths.get(path))</code>
