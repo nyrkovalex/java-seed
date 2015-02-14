@@ -1,6 +1,7 @@
 package com.github.nyrkovalex.seed.core;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -19,30 +20,32 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Seed {
+
     private Seed() {
     }
 
     public static final class Logging {
+
         private Logging() {
         }
 
         /**
-         * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided and
-         * {@link com.github.nyrkovalex.seed.core.Seed.Logging.DetailedFormatter}
+         * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided
+         * and {@link com.github.nyrkovalex.seed.core.Seed.Logging.DetailedFormatter}
          *
          * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
-         * @param clazz        apply such settings to target class' package and its children
+         * @param clazz apply such settings to target class' package and its children
          */
         public static void init(boolean debugEnabled, Class<?> clazz) {
             init(debugEnabled, clazz.getPackage().getName());
         }
 
         /**
-         * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided and
-         * {@link com.github.nyrkovalex.seed.core.Seed.Logging.DetailedFormatter}
+         * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided
+         * and {@link com.github.nyrkovalex.seed.core.Seed.Logging.DetailedFormatter}
          *
          * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
-         * @param rootPackage  apply such settings to target package and its children
+         * @param rootPackage apply such settings to target package and its children
          */
         public static void init(boolean debugEnabled, String rootPackage) {
             init(debugEnabled, rootPackage, new DetailedFormatter());
@@ -52,8 +55,8 @@ public final class Seed {
          * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided
          *
          * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
-         * @param clazz        apply such settings to target class' package and its children
-         * @param formatter    formatter to be used for all loggers
+         * @param clazz apply such settings to target class' package and its children
+         * @param formatter formatter to be used for all loggers
          */
         public static void init(boolean debugEnabled, Class<?> clazz, Formatter formatter) {
             init(debugEnabled, clazz.getPackage().getName(), formatter);
@@ -63,8 +66,8 @@ public final class Seed {
          * Initializes root {@link Logger} and its {@link Handler}s depending on argument provided
          *
          * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
-         * @param rootPackage  apply such settings to target package and its children
-         * @param formatter    formatter to be used for all loggers
+         * @param rootPackage apply such settings to target package and its children
+         * @param formatter formatter to be used for all loggers
          */
         public static void init(boolean debugEnabled, String rootPackage, Formatter formatter) {
             Level targetLevel = debugEnabled ? Level.FINEST : Level.INFO;
@@ -81,6 +84,7 @@ public final class Seed {
          * Formats detailed log record as follows: <code>date [ LEVEL ] - class.Name: time</code>
          */
         public static class DetailedFormatter extends Formatter {
+
             @Override
             public String format(LogRecord record) {
                 return String.format(
@@ -98,6 +102,7 @@ public final class Seed {
          * Simply writes log message with no details around
          */
         public static class StdOutFormatter extends java.util.logging.Formatter {
+
             @Override
             public String format(LogRecord record) {
                 return record.getMessage() + "\n";
@@ -106,12 +111,13 @@ public final class Seed {
     }
 
     public static final class Files {
+
         private Files() {
         }
-        
+
         /**
          * Reads target file contents to a single String
-         * 
+         *
          * @param path target file path
          * @return target file content as a single String
          * @throws IOException if something goes wrong
@@ -157,25 +163,41 @@ public final class Seed {
         }
     }
 
-    public static final class Console {
+    /**
+     * Console abstraction, useful for mocking this out as a dependency
+     */
+    public static class Console {
+
         private Console() {
+
         }
 
-        /**
-         * Console input abstraction, useful for mocking this as a dependency
-         */
-        public static class InputProvider {
-            public String read(String prompt) {
-                return System.console().readLine(prompt);
-            }
+        public String read(String prompt) {
+            return System.console().readLine(prompt);
+        }
 
-            public String readSecure(String prompt) {
-                return String.copyValueOf(System.console().readPassword(prompt));
+        public String readSecure(String prompt) {
+            return String.copyValueOf(System.console().readPassword(prompt));
+        }
+
+        public void printf(String message, Object... args) {
+            try (PrintWriter writer = System.console().writer()) {
+                writer.printf(message, args);
             }
         }
     }
 
+    /**
+     * Creates real {@link Console} object delegating its call to {@link System#console()}
+     *
+     * @return {@link Console instance}
+     */
+    public static Console console() {
+        return new Console();
+    }
+
     public static final class Strings {
+
         private Strings() {
         }
 
@@ -183,7 +205,7 @@ public final class Seed {
          * Joins items with provided separator.
          *
          * @param separator separator symbol
-         * @param items     items to join
+         * @param items items to join
          * @return string representation of items joined with separator
          */
         public static String join(String separator, Iterable<?> items) {
@@ -241,19 +263,20 @@ public final class Seed {
         }
 
         /**
-         * Creates a {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} for a given path.
+         * Creates a {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} for a given
+         * path.
          *
          * @param path directory to load classes from
-         * @return {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} capable of loading classes from
-         * a <code>path</code> provided
+         * @return {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} capable of
+         * loading classes from a <code>path</code> provided
          */
         public static ClassLoaderProvider forPath(String path) {
             return new ClassLoaderProvider(path);
         }
 
         /**
-         * Creates a {@link java.lang.ClassLoader} recursively scanning <code>path</code> directory contents
-         * adding all of the underlying files to its classpath.
+         * Creates a {@link java.lang.ClassLoader} recursively scanning <code>path</code> directory
+         * contents adding all of the underlying files to its classpath.
          *
          * @return {@link java.lang.ClassLoader} for a given directory
          */

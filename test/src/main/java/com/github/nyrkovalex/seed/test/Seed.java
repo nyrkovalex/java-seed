@@ -4,7 +4,10 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
 import org.junit.Before;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.OngoingStubbing;
+import org.mockito.verification.VerificationMode;
 
 
 @SuppressWarnings("UnusedDeclaration")
@@ -83,6 +86,33 @@ public final class Seed {
          */
         public static <T> Matcher<T> instanceOf(Class<?> type) {
             return CoreMatchers.instanceOf(type);
+        }
+        
+        /**
+         * Delegates to {@link Mockito#verify(java.lang.Object) }
+         * 
+         * @see Mockito#verify(java.lang.Object)
+         */
+        public static <T> T verify(T mock) {
+            return Mockito.verify(mock);
+        }
+        
+        /**
+         * Delegates to {@link Mockito#verify(java.lang.Object, VerificationMode) }
+         * 
+         * @see Mockito#verify(java.lang.Object, VerificationMode)
+         */
+        public static <T> T verify(T mock, VerificationMode mode) {
+            return Mockito.verify(mock, mode);
+        }
+        
+        /**
+         * Delegates to {@link Mockito#when(java.lang.Object) }
+         * 
+         * @see Mockito#when(java.lang.Object) 
+         */
+        public static <T> OngoingStubbing<T> when(T methodCall) {
+            return Mockito.when(methodCall);
         }
 
         @Before
