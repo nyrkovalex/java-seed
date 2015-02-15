@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Formatter;
@@ -219,6 +220,17 @@ public final class Seed {
                 appendSeparator = true;
             }
             return builder.toString();
+        }
+        
+        /**
+         * Joins items with provided separator.
+         *
+         * @param separator separator symbol
+         * @param items items to join
+         * @return string representation of items joined with separator
+         */
+        public static String join(String separator, Object... items) {
+            return join(separator, Arrays.asList(items));
         }
     }
 
