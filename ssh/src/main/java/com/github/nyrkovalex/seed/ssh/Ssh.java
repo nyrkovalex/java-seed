@@ -5,8 +5,8 @@ public final class Ssh {
     private Ssh() {
     }
 
-    public static ScpCommand scp(String path) {
-        return new ScpCommand(path);
+    public static ScpCommand scpTo(String url) {
+        return new ScpCommand(url);
     }
 
 }
