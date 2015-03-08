@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * <p>Continuous process abstraction. Chain represents a sequence of {@link com.github.nyrkovalex.seed.core.Chain.Callable}s executed in the FIFO order
+ * <p>Continuous process abstraction. Chain represents a sequence of
+ * {@link com.github.nyrkovalex.seed.core.Chain.Callable}s executed in the FIFO order
  * only if previous step succeeded i.e. no Exception was thrown.</p>
- * <p>{@link com.github.nyrkovalex.seed.core.Chain.Callable}s are considered unrelated and share no context.</p>
+ * 
+ * <p>{@link com.github.nyrkovalex.seed.core.Chain.Callable}s
+ * are considered unrelated and share no context.</p>
  * <pre>
  * // Example usage:
  *

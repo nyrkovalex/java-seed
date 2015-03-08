@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,7 +24,7 @@ public class FlowTest extends Seed.Test {
     @Test
     public void testShouldInvokeOneStep() throws Exception {
         String result = Flow.start(() -> RESULT).end();
-        assertThat(result, is(RESULT));
+        expect(result).toBe(RESULT);
     }
 
     @Test
@@ -36,7 +35,7 @@ public class FlowTest extends Seed.Test {
                 .then((i) -> i == 2)
                 .then((i) -> i ? RESULT : "")
                 .end();
-        assertThat(result, is(RESULT));
+        expect(result).toBe(RESULT);
     }
 
     @Test

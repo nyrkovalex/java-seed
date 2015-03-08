@@ -1,30 +1,193 @@
 package com.github.nyrkovalex.seed.core;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Seed {
 
-    private Seed() {
+    /**
+     * Creates a filesystem absraction that can be used as an external dependency for your classes
+     *
+     * @return {@link Fs} instance
+     */
+    public static Fs fs() {
+        return com.github.nyrkovalex.seed.core.Fs.instance();
     }
 
+    /**
+     * Creates real {@link Console} object delegating its call to {@link System#console()}
+     *
+     * @return {@link Console instance}
+     */
+    public static Console console() {
+        return com.github.nyrkovalex.seed.core.Console.instance();
+    }
+
+    /**
+     * <p>
+     * Creates a {@link Seed.Provider} of a {@link ClassLoader} for a given path.
+     * Such {@link ClassLoader} will load classes by recursing into the path provided
+     * and scanning all <code>*.jar</code> files found.
+     * </p>
+     * <p>
+     * Useful for plugin loading
+     * </p>
+     *
+     * @param path directory to load classes from
+     * @return {@link Seed.Provider} of a {@link ClassLoader} capable of loading
+     * classes from a <code>path</code> provided
+     *
+     * @see ClassLoader
+     * @see Provider
+     */
+    public static Provider<ClassLoader> forPath(String path) {
+        return new ClassLoaderProvider(path);
+    }
+
+    /**
+     * Creates a {@link Logger} for a given {@link Class} using its name as a {@link Logger} name
+     *
+     * @param clazz class to create a {@link Logger} for
+     * @return {@link Logger} for a given class
+     *
+     * @see Logger
+     */
+    public static Logger logger(Class<?> clazz) {
+        return Logger.getLogger(clazz.getName());
+    }
+
+    private Seed() {
+        // Non-instantiable
+    }
+
+    /**
+     * Serves to factor out construction of class <code>T</code> to a separate object
+     *
+     * @param <T> class being created by current object
+     */
+    public static interface Provider<T> {
+
+        T get();
+    }
+
+    /**
+     * Simple console abstraction. Can be used for dependency injection and mocking
+     */
+    public static interface Console {
+
+        /**
+         * Prints formatted output to a console
+         *
+         * @param message message template
+         * @param args arguments
+         */
+        void printf(String message, Object... args);
+
+        /**
+         * Reads user input from a console displaying a given prompt message
+         *
+         * @param prompt prompt message to display
+         * @return user input as a {@link String}
+         */
+        String read(String prompt);
+
+        /**
+         * Reads secure user input hiding actual typed characters from a console
+         * displaying a given prompt message
+         *
+         * @param prompt prompt message to display
+         * @return user input as a {@link String}
+         */
+        String readSecure(String prompt);
+
+    }
+
+    /**
+     * Filesystem abstraction mostly for dependency injection and easy mocking
+     */
+    public static interface Fs {
+
+        /**
+         * Creates a {@link Seed.File} instance on a given path
+         *
+         * @param path path to a file
+         * @return {@link Seed.File} instance bound to a given path
+         */
+        File file(String path);
+    }
+
+    /**
+     * Easy to use file abstraction suitable for mocking
+     */
+    public static interface File {
+
+        /**
+         * Deletes target file or directory with its contents, just like <code>rm -rf</code> would
+         *
+         * @throws IOException if something goes wrong
+         */
+        void deleteWithContents() throws IOException;
+
+        /**
+         * Check whether file with a given path exists
+         *
+         * @return true if file exists on a given path
+         */
+        boolean exists();
+
+        /**
+         * Path current object is bound to
+         *
+         * @return target path
+         */
+        String path();
+
+        /**
+         * Creates a {@link BufferedReader} reading current file bytes
+         *
+         * @return {@link BufferedReader} for current file
+         * @throws IOException if something goes wrong
+         */
+        BufferedReader reader() throws IOException;
+
+        /**
+         * Reads current file as an {@link InputStream}
+         *
+         * @return {@link InputStream} of a current file
+         * @throws IOException if something goes wrong
+         */
+        InputStream stream() throws IOException;
+
+        /**
+         * Reads target file contents to a single String
+         *
+         * @return target file content as a single String
+         * @throws IOException if something goes wrong
+         */
+        String string() throws IOException;
+
+        /**
+         * Writes bytes to a current file
+         *
+         * @param data bytes to write
+         * @throws IOException if something goes wrong
+         */
+        void write(byte[] data) throws IOException;
+    }
+
+    /**
+     * Contains helping functions for logging jumpstart using {@link Logger}
+     */
     public static final class Logging {
 
         private Logging() {
@@ -111,92 +274,9 @@ public final class Seed {
         }
     }
 
-    public static final class Files {
-
-        private Files() {
-        }
-
-        /**
-         * Reads target file contents to a single String
-         *
-         * @param path target file path
-         * @return target file content as a single String
-         * @throws IOException if something goes wrong
-         */
-        public static String readToString(String path) throws IOException {
-            return new String(java.nio.file.Files.readAllBytes(Paths.get(path)));
-        }
-
-        /**
-         * Shorthand for the <code>Files.exists(Paths.get(path))</code>
-         *
-         * @param path path to check
-         * @return <code>true</code> if file or directory exists
-         */
-        public static boolean exists(String path) {
-            return java.nio.file.Files.exists(Paths.get(path));
-        }
-
-        /**
-         * Deletes target file or directory with its contents, just like <code>rm -rf</code> would
-         *
-         * @param path file or directory path to delete
-         * @throws IOException if something goes wrong
-         */
-        public static void deleteWithContents(String path) throws IOException {
-            try {
-                recurseDelete(Paths.get(path));
-            } catch (RuntimeException ex) {
-                throw new IOException(ex.getCause());
-            }
-        }
-
-        private static void recurseDelete(Path f) throws RuntimeException {
-            try {
-                if (java.nio.file.Files.isDirectory(f)) {
-                    java.nio.file.Files.list(f).forEach(Files::recurseDelete);
-                }
-                java.nio.file.Files.deleteIfExists(f);
-            } catch (IOException ex) {
-                // Propagate as runtime exception so we can use method reference above
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
     /**
-     * Console abstraction, useful for mocking this out as a dependency
+     * Helper functions for {@link String} class
      */
-    public static class Console {
-
-        private Console() {
-
-        }
-
-        public String read(String prompt) {
-            return System.console().readLine(prompt);
-        }
-
-        public String readSecure(String prompt) {
-            return String.copyValueOf(System.console().readPassword(prompt));
-        }
-
-        public void printf(String message, Object... args) {
-            try (PrintWriter writer = System.console().writer()) {
-                writer.printf(message, args);
-            }
-        }
-    }
-
-    /**
-     * Creates real {@link Console} object delegating its call to {@link System#console()}
-     *
-     * @return {@link Console instance}
-     */
-    public static Console console() {
-        return new Console();
-    }
-
     public static final class Strings {
 
         private Strings() {
@@ -221,7 +301,7 @@ public final class Seed {
             }
             return builder.toString();
         }
-        
+
         /**
          * Joins items with provided separator.
          *
@@ -232,69 +312,7 @@ public final class Seed {
         public static String join(String separator, Object... items) {
             return join(separator, Arrays.asList(items));
         }
+
     }
 
-    /**
-     * Helps to load jars from target directory, e.g. useful for plugin implementation
-     */
-    public static class ClassLoaderProvider {
-
-        private final String path;
-
-        private ClassLoaderProvider(String path) {
-            this.path = path;
-        }
-
-        private static URL pathToUrl(Path p) throws AssertionError {
-            try {
-                return p.toUri().toURL();
-            } catch (MalformedURLException ex) {
-                throw new AssertionError("Should not happen");
-            }
-        }
-
-        private static List<URL> readDirectory(Path directory) {
-            List<URL> urls = new ArrayList<>();
-            safeList(directory).forEach(p -> {
-                if (!java.nio.file.Files.isDirectory(p)) {
-                    urls.add(pathToUrl(p));
-                    return;
-                }
-                urls.addAll(readDirectory(p));
-
-            });
-            return urls;
-        }
-
-        private static Stream<Path> safeList(Path directory) throws IllegalStateException {
-            try {
-                return java.nio.file.Files.list(directory);
-            } catch (IOException ex) {
-                throw new IllegalStateException("Failed to read directory", ex);
-            }
-        }
-
-        /**
-         * Creates a {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} for a given
-         * path.
-         *
-         * @param path directory to load classes from
-         * @return {@link com.github.nyrkovalex.seed.core.Seed.ClassLoaderProvider} capable of
-         * loading classes from a <code>path</code> provided
-         */
-        public static ClassLoaderProvider forPath(String path) {
-            return new ClassLoaderProvider(path);
-        }
-
-        /**
-         * Creates a {@link java.lang.ClassLoader} recursively scanning <code>path</code> directory
-         * contents adding all of the underlying files to its classpath.
-         *
-         * @return {@link java.lang.ClassLoader} for a given directory
-         */
-        public ClassLoader get() {
-            List<URL> plugins = readDirectory(Paths.get(path));
-            return new URLClassLoader(plugins.toArray(new URL[plugins.size()]));
-        }
-    }
 }
