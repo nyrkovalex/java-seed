@@ -6,67 +6,67 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 public class ConsoleUserInfoTest extends com.github.nyrkovalex.seed.test.Seed.Test {
-    
+
     @Mock private Seed.Console console;
     @InjectMocks private ConsoleUserInfo userInfo;
-    
+
     @Test
     public void testShouldPrintMessage() {
         userInfo.showMessage("test");
-        verify(console).printf("test");
+        expect(console).toHaveCall().printf("test");
     }
 
     @Test
     public void testShouldAskForPassphrase() {
         userInfo.promptPassphrase("passphrase");
-        verify(console).readSecure("passphrase: ");
+        expect(console).toHaveCall().readSecure("passphrase: ");
     }
-    
+
     @Test
     public void testShouldAlwaysReturnTrueWhenAskedForPassphrase() {
-        assertThat(userInfo.promptPassphrase("test"));
+        expect(userInfo.promptPassphrase("test")).toBe(Boolean.TRUE);
     }
-    
+
     @Test
     public void testShouldReturnPassphraseProvided() {
-        when(console.readSecure("test: ")).thenReturn("secret");
+        given(console.readSecure("test: ")).returns("secret");
         userInfo.promptPassphrase("test");
-        assertThat(userInfo.getPassphrase(), is("secret"));
+        expect(userInfo.getPassphrase()).toBe(("secret"));
     }
-    
+
     @Test
     public void testShouldAskForPassword() {
         userInfo.promptPassword("password");
-        verify(console).readSecure("password: ");
+        expect(console).toHaveCall().readSecure("password: ");
     }
-    
+
     @Test
     public void testShouldAlwaysReturnTrueWhenAskedForPassword() {
-        assertThat(userInfo.promptPassword("foo"));
+        expect(userInfo.promptPassword("foo")).toBe(Boolean.TRUE);
     }
-    
+
     @Test
     public void testShouldReturnPasswordProvided() {
-        when(console.readSecure("pass: ")).thenReturn("secret2");
+        given(console.readSecure("pass: ")).returns("secret2");
         userInfo.promptPassword("pass");
-        assertThat(userInfo.getPassword(), is("secret2"));
+        expect(userInfo.getPassword()).toBe("secret2");
     }
-    
+
     @Test
     public void testShouldShouldReturnYes() {
-        when(console.read("really?: ")).thenReturn("y");
-        assertThat(userInfo.promptYesNo("really?"));
+        given(console.read("really?: ")).returns("y");
+        expect(userInfo.promptYesNo("really?")).toBe(Boolean.TRUE);
     }
-    
+
     @Test
     public void testShouldShouldIgnoreYesCase() {
-        when(console.read("really?: ")).thenReturn("Y");
-        assertThat(userInfo.promptYesNo("really?"));
+        given(console.read("really?: ")).returns("Y");
+        expect(userInfo.promptYesNo("really?")).toBe(Boolean.TRUE);
     }
-    
+
     @Test
     public void testShouldReturnNo() {
-        when(console.read("really?: ")).thenReturn("n");
-        assertThat(!userInfo.promptYesNo("really?"));
+        given(console.read("really?: ")).returns("n");
+        expect(userInfo.promptYesNo("really?")).toBe(Boolean.FALSE);
     }
 }

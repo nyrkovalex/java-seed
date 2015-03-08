@@ -30,9 +30,25 @@ public final class Seed {
             return new Expectation<>(actual);
         }
 
+        public static <T> Assurance<T> given(T methodCall) {
+            return new Assurance<>(methodCall);
+        }
+
         @Before
         public void initMocks() {
             MockitoAnnotations.initMocks(this);
+        }
+    }
+
+    public static class Assurance<T> {
+        private final T methodCall;
+
+        public Assurance(T methodCall) {
+            this.methodCall = methodCall;
+        }
+
+        public void returns(T value) {
+            Mockito.when(value).thenReturn(value);
         }
     }
 
