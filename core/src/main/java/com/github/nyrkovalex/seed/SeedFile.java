@@ -1,7 +1,6 @@
 
 package com.github.nyrkovalex.seed;
 
-import com.github.nyrkovalex.seed.Seed;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,28 +11,10 @@ import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-class Fs implements Seed.Fs {
-
-    private static final Fs INSTANCE = new Fs();
-
-    public static Fs instance() {
-        return INSTANCE;
-    }
-
-    private Fs() { }
-
-    @Override
-    public Seed.File file(String path) {
-        return new File(path);
-    }
-}
-
-
-class File implements Seed.File {
-
+class SeedFile implements Seed.File {
     private final Path path;
 
-    File(String path) {
+    SeedFile(String path) {
         this.path = Paths.get(path);
     }
 
@@ -49,7 +30,7 @@ class File implements Seed.File {
 
     @Override
     public void write(Consumer<BufferedWriter> handler) throws IOException {
-        try(BufferedWriter writer = Files.newBufferedWriter(path)) {
+        try (final BufferedWriter writer = Files.newBufferedWriter(path)) {
             handler.accept(writer);
         }
     }
@@ -71,7 +52,7 @@ class File implements Seed.File {
 
     @Override
     public <T> T reader(Function<BufferedReader, T> handler) throws IOException {
-        try(BufferedReader reader = reader()) {
+        try (final BufferedReader reader = reader()) {
             return handler.apply(reader);
         }
     }
@@ -83,7 +64,7 @@ class File implements Seed.File {
 
     @Override
     public <T> T stream(Function<InputStream, T> handler) throws IOException {
-        try(InputStream stream = stream()) {
+        try (final InputStream stream = stream()) {
             return handler.apply(stream);
         }
     }
@@ -104,13 +85,14 @@ class File implements Seed.File {
 
     private static void recurseDelete(Path f) throws RuntimeException {
         try {
-            if (java.nio.file.Files.isDirectory(f)) {
-                java.nio.file.Files.list(f).forEach(File::recurseDelete);
+            if (Files.isDirectory(f)) {
+                Files.list(f).forEach(SeedFile::recurseDelete);
             }
-            java.nio.file.Files.deleteIfExists(f);
+            Files.deleteIfExists(f);
         } catch (IOException ex) {
             // Propagate as runtime exception so we can use method reference above
             throw new RuntimeException(ex);
         }
     }
+
 }

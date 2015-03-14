@@ -24,7 +24,7 @@ public final class Seed {
      * @return {@link Fs} instance
      */
     public static Fs fs() {
-        return com.github.nyrkovalex.seed.Fs.instance();
+        return SeedFs.instance();
     }
 
     /**
@@ -33,7 +33,7 @@ public final class Seed {
      * @return {@link Console instance}
      */
     public static Console console() {
-        return com.github.nyrkovalex.seed.Console.instance();
+        return SeedConsole.instance();
     }
 
     public static PluginLoader pluginLoader() {

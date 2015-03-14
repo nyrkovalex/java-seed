@@ -17,6 +17,7 @@
         <module>core</module>
         <module>test</module>
         <module>ssh</module>
+        <module>json</module>
     </modules>
 
     <build>

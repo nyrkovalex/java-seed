@@ -3,15 +3,15 @@ package com.github.nyrkovalex.seed;
 import com.github.nyrkovalex.seed.Seed;
 import java.io.PrintWriter;
 
-class Console implements Seed.Console {
+class SeedConsole implements Seed.Console {
 
-    private static final Console INSTANCE = new Console();
+    private static final SeedConsole INSTANCE = new SeedConsole();
 
-    public static Console instance() {
+    public static SeedConsole instance() {
         return INSTANCE;
     }
 
-    private Console() {
+    private SeedConsole() {
     }
 
     @Override
