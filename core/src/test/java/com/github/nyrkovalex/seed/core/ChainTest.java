@@ -1,6 +1,7 @@
 package com.github.nyrkovalex.seed.core;
 
-import com.github.nyrkovalex.seed.test.Seed;
+import com.github.nyrkovalex.seed.Expect;
+import com.github.nyrkovalex.seed.Chain;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -10,7 +11,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public class ChainTest extends Seed.Test {
+public class ChainTest extends Expect.Test {
 
     @Mock private Chain.Callable firstStep;
     @Mock private Chain.Callable secondStep;

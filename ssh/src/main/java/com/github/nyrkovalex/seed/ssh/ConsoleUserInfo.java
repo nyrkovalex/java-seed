@@ -1,6 +1,6 @@
 package com.github.nyrkovalex.seed.ssh;
 
-import com.github.nyrkovalex.seed.core.Seed;
+import com.github.nyrkovalex.seed.Seed;
 import com.jcraft.jsch.UserInfo;
 
 class ConsoleUserInfo implements UserInfo {

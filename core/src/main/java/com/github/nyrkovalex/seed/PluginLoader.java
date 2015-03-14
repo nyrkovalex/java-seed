@@ -1,5 +1,6 @@
-package com.github.nyrkovalex.seed.core;
+package com.github.nyrkovalex.seed;
 
+import com.github.nyrkovalex.seed.Seed;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -10,14 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-class ClassLoaderProvider implements Seed.Provider<ClassLoader> {
-
-    private final String path;
-
-    ClassLoaderProvider(String path) {
-        this.path = path;
-    }
-
+class PluginLoader implements Seed.PluginLoader {
     private static URL pathToUrl(Path p) throws AssertionError {
         try {
             return p.toUri().toURL();
@@ -48,7 +42,7 @@ class ClassLoaderProvider implements Seed.Provider<ClassLoader> {
     }
 
     @Override
-    public ClassLoader get() {
+    public ClassLoader forPath(String path) {
         List<URL> plugins = readDirectory(Paths.get(path));
         return new URLClassLoader(plugins.toArray(new URL[plugins.size()]));
     }

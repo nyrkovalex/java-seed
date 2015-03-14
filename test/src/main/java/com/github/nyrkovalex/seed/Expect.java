@@ -1,4 +1,4 @@
-package com.github.nyrkovalex.seed.test;
+package com.github.nyrkovalex.seed;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -8,10 +8,10 @@ import org.mockito.MockitoAnnotations;
 
 
 @SuppressWarnings("UnusedDeclaration")
-public final class Seed {
+public final class Expect {
     // This class is factored out to standalone module to be used as a dependency with `test` scope
 
-    private Seed() {
+    private Expect() {
     }
 
     /**

@@ -1,11 +1,14 @@
-package com.github.nyrkovalex.seed.core;
+package com.github.nyrkovalex.seed;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -21,7 +24,7 @@ public final class Seed {
      * @return {@link Fs} instance
      */
     public static Fs fs() {
-        return com.github.nyrkovalex.seed.core.Fs.instance();
+        return com.github.nyrkovalex.seed.Fs.instance();
     }
 
     /**
@@ -30,28 +33,11 @@ public final class Seed {
      * @return {@link Console instance}
      */
     public static Console console() {
-        return com.github.nyrkovalex.seed.core.Console.instance();
+        return com.github.nyrkovalex.seed.Console.instance();
     }
 
-    /**
-     * <p>
-     * Creates a {@link Seed.Provider} of a {@link ClassLoader} for a given path.
-     * Such {@link ClassLoader} will load classes by recursing into the path provided
-     * and scanning all <code>*.jar</code> files found.
-     * </p>
-     * <p>
-     * Useful for plugin loading
-     * </p>
-     *
-     * @param path directory to load classes from
-     * @return {@link Seed.Provider} of a {@link ClassLoader} capable of loading
-     * classes from a <code>path</code> provided
-     *
-     * @see ClassLoader
-     * @see Provider
-     */
-    public static Provider<ClassLoader> forPath(String path) {
-        return new ClassLoaderProvider(path);
+    public static PluginLoader pluginLoader() {
+        return new com.github.nyrkovalex.seed.PluginLoader();
     }
 
     /**
@@ -71,13 +57,23 @@ public final class Seed {
     }
 
     /**
-     * Serves to factor out construction of class <code>T</code> to a separate object
-     *
-     * @param <T> class being created by current object
+     * Plugin loader creates a {@link ClassLoader} for a given directory. Useful for implementing
+     * plugin architecture
      */
-    public static interface Provider<T> {
+    public static interface PluginLoader {
 
-        T get();
+        /**
+         * Creates a {@link ClassLoader} for a given path. Such
+         * {@link ClassLoader} will load classes by recursing into the path provided and scanning
+         * all <code>*.jar</code> files found.
+         *
+         * @param path directory to load classes from
+         * @return {@link Seed.Provider} of a {@link ClassLoader} capable of loading classes from a
+         * <code>path</code> provided
+         *
+         * @see ClassLoader
+         */
+        ClassLoader forPath(String path);
     }
 
     /**
@@ -102,8 +98,8 @@ public final class Seed {
         String read(String prompt);
 
         /**
-         * Reads secure user input hiding actual typed characters from a console
-         * displaying a given prompt message
+         * Reads secure user input hiding actual typed characters from a console displaying a given
+         * prompt message
          *
          * @param prompt prompt message to display
          * @return user input as a {@link String}
@@ -160,6 +156,8 @@ public final class Seed {
          */
         BufferedReader reader() throws IOException;
 
+        <T> T reader(Function<BufferedReader, T> handler) throws IOException;
+
         /**
          * Reads current file as an {@link InputStream}
          *
@@ -167,6 +165,8 @@ public final class Seed {
          * @throws IOException if something goes wrong
          */
         InputStream stream() throws IOException;
+
+        <T> T stream(Function<InputStream, T> handler) throws IOException;
 
         /**
          * Reads target file contents to a single String
@@ -183,6 +183,8 @@ public final class Seed {
          * @throws IOException if something goes wrong
          */
         void write(byte[] data) throws IOException;
+
+        void write(Consumer<BufferedWriter> handler) throws IOException;
     }
 
     /**

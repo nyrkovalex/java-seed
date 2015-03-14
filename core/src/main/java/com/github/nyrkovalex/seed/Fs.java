@@ -1,12 +1,16 @@
 
-package com.github.nyrkovalex.seed.core;
+package com.github.nyrkovalex.seed;
 
+import com.github.nyrkovalex.seed.Seed;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 class Fs implements Seed.Fs {
 
@@ -44,16 +48,17 @@ class File implements Seed.File {
     }
 
     @Override
+    public void write(Consumer<BufferedWriter> handler) throws IOException {
+        try(BufferedWriter writer = Files.newBufferedWriter(path)) {
+            handler.accept(writer);
+        }
+    }
+
+    @Override
     public boolean exists() {
         return Files.exists(path);
     }
 
-    /**
-     * Reads target file contents to a single String
-     *
-     * @return target file content as a single String
-     * @throws IOException if something goes wrong
-     */
     @Override
     public String string() throws IOException {
         return new String(Files.readAllBytes(path));
@@ -65,8 +70,22 @@ class File implements Seed.File {
     }
 
     @Override
+    public <T> T reader(Function<BufferedReader, T> handler) throws IOException {
+        try(BufferedReader reader = reader()) {
+            return handler.apply(reader);
+        }
+    }
+
+    @Override
     public InputStream stream() throws IOException {
         return Files.newInputStream(path);
+    }
+
+    @Override
+    public <T> T stream(Function<InputStream, T> handler) throws IOException {
+        try(InputStream stream = stream()) {
+            return handler.apply(stream);
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
-package com.github.nyrkovalex.seed.core;
+package com.github.nyrkovalex.seed;
 
+import com.github.nyrkovalex.seed.Seed;
 import java.io.PrintWriter;
 
 class Console implements Seed.Console {
