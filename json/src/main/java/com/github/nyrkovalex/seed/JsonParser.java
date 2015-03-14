@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class JsonParser implements Json.Parser {
 
@@ -48,7 +51,7 @@ class JsonParser implements Json.Parser {
     }
 
     @Override
-    public WriteCommand write(Object data) throws IOException {
+    public WriteCommand write(Object data) {
         return new WriteCommand(data);
     }
 
@@ -87,8 +90,8 @@ class JsonParser implements Json.Parser {
         }
 
         @Override
-        public void to(Seed.File file) throws IOException {
-            file.write(GSON.toJson(data).getBytes());
+        public void to(Writer writer) throws IOException {
+            writer.write(GSON.toJson(data));
         }
     }
 }

@@ -52,6 +52,17 @@ public final class Seed {
         return Logger.getLogger(clazz.getName());
     }
 
+    /**
+     * Creates an {@link Seed.Error} instance for capturing exceptions of type <code>T</code>
+     *
+     * @param <T> type of exception this error object will catch
+     * @param errClass class of an expected exception
+     * @return {@link Seed.Error} capable of catching exceptions of type <code>T</code>
+     */
+    public static <T extends Throwable> Error<T> error(Class<T> errClass) {
+        return new SeedError<>(errClass);
+    }
+
     private Seed() {
         // Non-instantiable
     }
@@ -63,9 +74,9 @@ public final class Seed {
     public static interface PluginLoader {
 
         /**
-         * Creates a {@link ClassLoader} for a given path. Such
-         * {@link ClassLoader} will load classes by recursing into the path provided and scanning
-         * all <code>*.jar</code> files found.
+         * Creates a {@link ClassLoader} for a given path. Such {@link ClassLoader} will load
+         * classes by recursing into the path provided and scanning all <code>*.jar</code> files
+         * found.
          *
          * @param path directory to load classes from
          * @return {@link Seed.Provider} of a {@link ClassLoader} capable of loading classes from a
@@ -317,4 +328,57 @@ public final class Seed {
 
     }
 
+    /**
+     * <p>
+     * Wraps an exception instance, can be used to rethrow an exception captured from lambda.
+     * </p>
+     * <p>
+     * Not thread-safe
+     * </p>
+     *
+     * @param <T> type of ann error to catch
+     */
+    public static interface Error<T extends Throwable> {
+
+        /**
+         * Catches a throwable for further propagation.
+         *
+         * @param err
+         * @throws IllegalStateException
+         */
+        void propagate(T err) throws IllegalStateException;
+
+        /**
+         * Throws error captured or does nothing if no error was caught.
+         *
+         * @throws T if something nasty happenes
+         */
+        void rethrow() throws T;
+
+        /**
+         * <p>
+         * Calls an {@link UnsafeCallable} capturing any exception of an expected type and
+         * throwing a {@link RuntimeException} wrapping a throwable of any other type if thrown.
+         * </p>
+         * <p>
+         * <i>Don't go suicidal. Never use this to silence an error.</i>
+         * </p>
+         * @param call
+         */
+        void safeCall(UnsafeCallable<T> call);
+
+        /**
+         * A functional call that can produce an error.
+         * @param <T>
+         */
+        @FunctionalInterface
+        public static interface UnsafeCallable<T extends Throwable> {
+
+            /**
+             * Do something that can throw an exception of type T
+             * @throws T if something nasty happenes
+             */
+            void call() throws T;
+        }
+    }
 }

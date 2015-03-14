@@ -23,31 +23,41 @@
  */
 package com.github.nyrkovalex.seed;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Optional;
 
 class JsonFile<T> implements Json.File<T> {
 
     private final Seed.File file;
-    private final Json.Parser json;
+    private final Json.Parser parser;
     private final Class<T> clazz;
 
-    JsonFile(Seed.File file, Json.Parser json, Class<T> clazz) {
+    JsonFile(Seed.File file, Json.Parser parser, Class<T> clazz) {
         this.file = file;
-        this.json = json;
+        this.parser = parser;
         this.clazz = clazz;
     }
 
     @Override
-    public Optional<T> read() throws IOException {
+    public T read() throws IOException {
+        return file.reader(r -> parser.read(r).as(clazz));
+    }
+
+    @Override
+    public Optional<T> readIfExists() throws IOException {
         if (file.exists()) {
-            return Optional.of(file.reader(r -> json.read(r).as(clazz)));
+            return Optional.of(read());
         }
         return Optional.empty();
     }
 
     @Override
     public void write(T data) throws IOException {
-        json.write(data).to(file);
+        Seed.Error<IOException> err = Seed.error(IOException.class);
+        file.write((BufferedWriter w) -> {
+            err.safeCall(() -> parser.write(data).to(w));
+        });
+        err.rethrow();
     }
 }
