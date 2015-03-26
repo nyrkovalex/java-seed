@@ -59,7 +59,7 @@ class JsonParser implements Json.Parser {
     }
 
     @Override
-    public <T> Json.File<T> file(Seed.File file, Class<T> clazz) {
+    public <T> Json.File<T> file(Io.File file, Class<T> clazz) {
         return new JsonFile<>(file, this, clazz);
     }
 
@@ -90,8 +90,8 @@ class JsonParser implements Json.Parser {
         }
 
         @Override
-        public void to(Writer writer) throws IOException {
-            writer.write(GSON.toJson(data));
+        public void to(Writer writer) throws Io.Err {
+            Io.Err.rethrow(() -> writer.write(GSON.toJson(data)));
         }
     }
 }

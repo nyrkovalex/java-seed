@@ -1,14 +1,8 @@
 package com.github.nyrkovalex.seed;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -17,15 +11,6 @@ import java.util.logging.Logger;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Seed {
-
-    /**
-     * Creates a filesystem absraction that can be used as an external dependency for your classes
-     *
-     * @return {@link Fs} instance
-     */
-    public static Fs fs() {
-        return SeedFs.instance();
-    }
 
     /**
      * Creates real {@link Console} object delegating its call to {@link System#console()}
@@ -117,85 +102,6 @@ public final class Seed {
          */
         String readSecure(String prompt);
 
-    }
-
-    /**
-     * Filesystem abstraction mostly for dependency injection and easy mocking
-     */
-    public static interface Fs {
-
-        /**
-         * Creates a {@link Seed.File} instance on a given path
-         *
-         * @param path path to a file
-         * @return {@link Seed.File} instance bound to a given path
-         */
-        File file(String path);
-    }
-
-    /**
-     * Easy to use file abstraction suitable for mocking
-     */
-    public static interface File {
-
-        /**
-         * Deletes target file or directory with its contents, just like <code>rm -rf</code> would
-         *
-         * @throws IOException if something goes wrong
-         */
-        void deleteWithContents() throws IOException;
-
-        /**
-         * Check whether file with a given path exists
-         *
-         * @return true if file exists on a given path
-         */
-        boolean exists();
-
-        /**
-         * Path current object is bound to
-         *
-         * @return target path
-         */
-        String path();
-
-        /**
-         * Creates a {@link BufferedReader} reading current file bytes
-         *
-         * @return {@link BufferedReader} for current file
-         * @throws IOException if something goes wrong
-         */
-        BufferedReader reader() throws IOException;
-
-        <T> T reader(Function<BufferedReader, T> handler) throws IOException;
-
-        /**
-         * Reads current file as an {@link InputStream}
-         *
-         * @return {@link InputStream} of a current file
-         * @throws IOException if something goes wrong
-         */
-        InputStream stream() throws IOException;
-
-        <T> T stream(Function<InputStream, T> handler) throws IOException;
-
-        /**
-         * Reads target file contents to a single String
-         *
-         * @return target file content as a single String
-         * @throws IOException if something goes wrong
-         */
-        String string() throws IOException;
-
-        /**
-         * Writes bytes to a current file
-         *
-         * @param data bytes to write
-         * @throws IOException if something goes wrong
-         */
-        void write(byte[] data) throws IOException;
-
-        void write(Consumer<BufferedWriter> handler) throws IOException;
     }
 
     /**

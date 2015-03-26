@@ -29,23 +29,23 @@ import java.util.Optional;
 
 class JsonFile<T> implements Json.File<T> {
 
-    private final Seed.File file;
+    private final Io.File file;
     private final Json.Parser parser;
     private final Class<T> clazz;
 
-    JsonFile(Seed.File file, Json.Parser parser, Class<T> clazz) {
+    JsonFile(Io.File file, Json.Parser parser, Class<T> clazz) {
         this.file = file;
         this.parser = parser;
         this.clazz = clazz;
     }
 
     @Override
-    public T read() throws IOException {
+    public T read() throws Io.Err {
         return file.reader(r -> parser.read(r).as(clazz));
     }
 
     @Override
-    public Optional<T> readIfExists() throws IOException {
+    public Optional<T> readIfExists() throws Io.Err {
         if (file.exists()) {
             return Optional.of(read());
         }
@@ -53,8 +53,8 @@ class JsonFile<T> implements Json.File<T> {
     }
 
     @Override
-    public void write(T data) throws IOException {
-        Seed.Error<IOException> err = Seed.error(IOException.class);
+    public void write(T data) throws Io.Err {
+        Seed.Error<Io.Err> err = Seed.error(Io.Err.class);
         file.write((BufferedWriter w) -> {
             err.safeCall(() -> parser.write(data).to(w));
         });

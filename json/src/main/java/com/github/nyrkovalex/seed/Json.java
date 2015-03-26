@@ -1,6 +1,5 @@
 package com.github.nyrkovalex.seed;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Optional;
@@ -46,7 +45,7 @@ public final class Json {
          * @param clazz class to parse json to
          * @return {@link Json.File} bound to current parser and provided params
          */
-        <T> Json.File<T> file(Seed.File file, Class<T> clazz);
+        <T> Json.File<T> file(Io.File file, Class<T> clazz);
 
         /**
          * Specifies additional json reading params
@@ -72,9 +71,9 @@ public final class Json {
              * Writes json data to a writer provided
              *
              * @param writer writer to write json to
-             * @throws java.io.IOException if object cannot be dumped to json
+             * @throws java.io.Io.Err if object cannot be dumped to json
              */
-            void to(Writer writer) throws IOException;
+            void to(Writer writer) throws Io.Err;
         }
     }
 
@@ -98,9 +97,9 @@ public final class Json {
          * Reads json from target file to an instance of type <code>T</code>
          *
          * @return COntent of a file parsed to an instance of <code>T</code>
-         * @throws IOException if file content cannot be parsed to type <code>T</code>
+         * @throws Io.Err if file content cannot be parsed to type <code>T</code>
          */
-        T read() throws IOException;
+        T read() throws Io.Err;
 
         /**
          * <p>
@@ -113,17 +112,17 @@ public final class Json {
          *
          * @return {@link Optional} of type <code>T</code> with file content parsed to it or
          * {@link Optional#empty() }
-         * @throws IOException
+         * @throws Io.Err
          */
-        Optional<T> readIfExists() throws IOException;
+        Optional<T> readIfExists() throws Io.Err;
 
         /**
          * Writes data provided to an underlying file as a json string
          *
          * @param data data to write to file
-         * @throws IOException if <code>data</code> cannot be dumped to json
+         * @throws Io.Err if <code>data</code> cannot be dumped to json
          * or file cannot be written to
          */
-        void write(T data) throws IOException;
+        void write(T data) throws Io.Err;
     }
 }

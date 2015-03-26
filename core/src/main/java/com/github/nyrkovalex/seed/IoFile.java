@@ -11,10 +11,12 @@ import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-class SeedFile implements Seed.File {
+import com.github.nyrkovalex.seed.Io.Err;
+
+class IoFile implements Io.File {
     private final Path path;
 
-    SeedFile(String path) {
+    IoFile(String path) {
         this.path = Paths.get(path);
     }
 
@@ -24,15 +26,17 @@ class SeedFile implements Seed.File {
     }
 
     @Override
-    public void write(byte[] data) throws IOException {
-        Files.write(path, data);
+    public void write(byte[] data) throws Io.Err {
+        Io.Err.rethrow(() -> Files.write(path, data));
     }
 
     @Override
-    public void write(Consumer<BufferedWriter> handler) throws IOException {
-        try (final BufferedWriter writer = Files.newBufferedWriter(path)) {
-            handler.accept(writer);
-        }
+    public void write(Consumer<BufferedWriter> handler) throws Io.Err {
+        Io.Err.rethrow(() -> {
+            try (final BufferedWriter writer = Files.newBufferedWriter(path)) {
+                handler.accept(writer);
+            }
+        });
     }
 
     @Override
@@ -41,8 +45,8 @@ class SeedFile implements Seed.File {
     }
 
     @Override
-    public String string() throws IOException {
-        return new String(Files.readAllBytes(path));
+    public String string() throws Io.Err {
+        return Io.Err.rethrow(() -> new String(Files.readAllBytes(path)));
     }
 
     @Override
@@ -51,22 +55,26 @@ class SeedFile implements Seed.File {
     }
 
     @Override
-    public <T> T reader(Function<BufferedReader, T> handler) throws IOException {
-        try (final BufferedReader reader = reader()) {
-            return handler.apply(reader);
-        }
+    public <T> T reader(Function<BufferedReader, T> handler) throws Io.Err {
+        return Io.Err.rethrow(() -> {
+            try (final BufferedReader reader = reader()) {
+                return handler.apply(reader);
+            }
+        });
     }
 
     @Override
-    public InputStream stream() throws IOException {
-        return Files.newInputStream(path);
+    public InputStream stream() throws Io.Err {
+        return Io.Err.rethrow(() -> Files.newInputStream(path));
     }
 
     @Override
-    public <T> T stream(Function<InputStream, T> handler) throws IOException {
-        try (final InputStream stream = stream()) {
-            return handler.apply(stream);
-        }
+    public <T> T stream(Function<InputStream, T> handler) throws Io.Err {
+        return Io.Err.rethrow(() -> {
+            try (final InputStream stream = stream()) {
+                return handler.apply(stream);
+            }
+        });
     }
 
     /**
@@ -75,18 +83,18 @@ class SeedFile implements Seed.File {
      * @throws IOException if something goes wrong
      */
     @Override
-    public void deleteWithContents() throws IOException {
+    public void deleteWithContents() throws Io.Err {
         try {
             recurseDelete(path);
         } catch (RuntimeException ex) {
-            throw new IOException(ex.getCause());
+            throw new Io.Err(ex.getCause());
         }
     }
 
     private static void recurseDelete(Path f) throws RuntimeException {
         try {
             if (Files.isDirectory(f)) {
-                Files.list(f).forEach(SeedFile::recurseDelete);
+                Files.list(f).forEach(IoFile::recurseDelete);
             }
             Files.deleteIfExists(f);
         } catch (IOException ex) {
