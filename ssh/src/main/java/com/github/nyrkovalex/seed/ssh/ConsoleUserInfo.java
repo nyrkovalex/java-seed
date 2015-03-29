@@ -1,15 +1,15 @@
 package com.github.nyrkovalex.seed.ssh;
 
-import com.github.nyrkovalex.seed.Seed;
+import com.github.nyrkovalex.seed.sys.Sys;
 import com.jcraft.jsch.UserInfo;
 
 class ConsoleUserInfo implements UserInfo {
 
-    private final Seed.Console console;
+    private final Sys.Console console;
     private String passphrase;
     private String password;
 
-    public ConsoleUserInfo(Seed.Console console) {
+    public ConsoleUserInfo(Sys.Console console) {
         this.console = console;
     }
 

@@ -1,5 +1,7 @@
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.json;
 
+import com.github.nyrkovalex.seed.Seed;
+import com.github.nyrkovalex.seed.io.Io;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Optional;
@@ -71,9 +73,9 @@ public final class Json {
              * Writes json data to a writer provided
              *
              * @param writer writer to write json to
-             * @throws java.io.Io.Err if object cannot be dumped to json
+			 * @throws Err if object cannot be dumped to json
              */
-            void to(Writer writer) throws Io.Err;
+            void to(Writer writer) throws Err;
         }
     }
 
@@ -120,9 +122,16 @@ public final class Json {
          * Writes data provided to an underlying file as a json string
          *
          * @param data data to write to file
-         * @throws Io.Err if <code>data</code> cannot be dumped to json
+		 * @throws Json.Err if <code>data</code> cannot be dumped to json
          * or file cannot be written to
+		 * @throws Io.Err if something bad happens while writing to file
          */
-        void write(T data) throws Io.Err;
+        void write(T data) throws Json.Err, Io.Err;
     }
+
+	public static class Err extends Exception {
+		Err(Throwable cause) {
+			super(cause);
+		}
+	}
 }

@@ -29,7 +29,7 @@ class SeedError<T extends Throwable> implements Seed.Error<T> {
     }
 
     @Override
-    public void safeCall(UnsafeCallable<T> callable) {
+    public void safeCall(UnsafeCallable callable) {
         try {
             callable.call();
         } catch (Throwable t) {

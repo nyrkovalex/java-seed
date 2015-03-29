@@ -13,19 +13,6 @@ import java.util.logging.Logger;
 public final class Seed {
 
     /**
-     * Creates real {@link Console} object delegating its call to {@link System#console()}
-     *
-     * @return {@link Console instance}
-     */
-    public static Console console() {
-        return SeedConsole.instance();
-    }
-
-    public static PluginLoader pluginLoader() {
-        return new com.github.nyrkovalex.seed.PluginLoader();
-    }
-
-    /**
      * Creates a {@link Logger} for a given {@link Class} using its name as a {@link Logger} name
      *
      * @param clazz class to create a {@link Logger} for
@@ -52,57 +39,6 @@ public final class Seed {
         // Non-instantiable
     }
 
-    /**
-     * Plugin loader creates a {@link ClassLoader} for a given directory. Useful for implementing
-     * plugin architecture
-     */
-    public static interface PluginLoader {
-
-        /**
-         * Creates a {@link ClassLoader} for a given path. Such {@link ClassLoader} will load
-         * classes by recursing into the path provided and scanning all <code>*.jar</code> files
-         * found.
-         *
-         * @param path directory to load classes from
-         * @return {@link Seed.Provider} of a {@link ClassLoader} capable of loading classes from a
-         * <code>path</code> provided
-         *
-         * @see ClassLoader
-         */
-        ClassLoader forPath(String path);
-    }
-
-    /**
-     * Simple console abstraction. Can be used for dependency injection and mocking
-     */
-    public static interface Console {
-
-        /**
-         * Prints formatted output to a console
-         *
-         * @param message message template
-         * @param args arguments
-         */
-        void printf(String message, Object... args);
-
-        /**
-         * Reads user input from a console displaying a given prompt message
-         *
-         * @param prompt prompt message to display
-         * @return user input as a {@link String}
-         */
-        String read(String prompt);
-
-        /**
-         * Reads secure user input hiding actual typed characters from a console displaying a given
-         * prompt message
-         *
-         * @param prompt prompt message to display
-         * @return user input as a {@link String}
-         */
-        String readSecure(String prompt);
-
-    }
 
     /**
      * Contains helping functions for logging jumpstart using {@link Logger}
@@ -271,20 +207,20 @@ public final class Seed {
          * </p>
          * @param call
          */
-        void safeCall(UnsafeCallable<T> call);
+        void safeCall(UnsafeCallable call);
 
         /**
          * A functional call that can produce an error.
          * @param <T>
          */
         @FunctionalInterface
-        public static interface UnsafeCallable<T extends Throwable> {
+        public static interface UnsafeCallable {
 
             /**
              * Do something that can throw an exception of type T
-             * @throws T if something nasty happenes
+             * @throws Exception if something nasty happenes
              */
-            void call() throws T;
+            void call() throws Exception;
         }
     }
 }

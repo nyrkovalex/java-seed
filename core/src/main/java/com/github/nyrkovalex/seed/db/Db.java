@@ -1,10 +1,8 @@
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.db;
 
 import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Db {
 
@@ -14,12 +12,12 @@ public class Db {
 
     public static interface Runner {
         void run(String sql) throws Db.Err;
-
-        void query(String sql, Consumer<ResultSet> callback) throws Db.Err;
+        void one(String string, VoidCallback callback) throws Db.Err;
+        void query(String sql, VoidCallback callback) throws Db.Err;
     }
 
     public static interface Connection extends Runner, AutoCloseable {
-        void transaction(Function<Runner, Boolean> callback) throws Db.Err;
+        void transaction(TransctionCallback callback) throws Db.Err;
     }
 
     public static class ConnectionBuilder {
@@ -37,13 +35,17 @@ public class Db {
             }
         }
     }
-    
-    public static class Err extends Exception {
+
+    public static final class Err extends Exception {
         private static final long serialVersionUID = 1L;
 
-        private Err(Throwable cause) {
+        Err(Throwable cause) {
             super(cause);
         }
+
+		Err(String message) {
+			super(message);
+		}
 
         static void rethrow(SqlCall call) throws Db.Err {
             try {
@@ -52,10 +54,22 @@ public class Db {
                 throw new Db.Err(ex);
             }
         }
-        
+
         @FunctionalInterface
         static interface SqlCall {
-            void call() throws SQLException;
+            void call() throws Db.Err, SQLException;
         }
     }
+
+	@FunctionalInterface
+	public static interface VoidCallback {
+		void call(ResultSet rs) throws SQLException;
+	}
+
+	@FunctionalInterface
+	public static interface TransctionCallback {
+		boolean call(Runner runner) throws Db.Err;
+	}
+
+
 }

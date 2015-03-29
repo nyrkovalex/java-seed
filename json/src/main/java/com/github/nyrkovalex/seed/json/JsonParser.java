@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.json;
 
+import com.github.nyrkovalex.seed.io.Io;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
@@ -90,8 +91,12 @@ class JsonParser implements Json.Parser {
         }
 
         @Override
-        public void to(Writer writer) throws Io.Err {
-            Io.Err.rethrow(() -> writer.write(GSON.toJson(data)));
+        public void to(Writer writer) throws Json.Err {
+			try {
+				writer.write(GSON.toJson(data));
+			} catch (IOException ex) {
+				throw new Json.Err(ex);
+			}
         }
     }
 }

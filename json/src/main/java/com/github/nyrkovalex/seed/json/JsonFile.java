@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.json;
 
+import com.github.nyrkovalex.seed.*;
+import com.github.nyrkovalex.seed.io.Io;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.Optional;
 
 class JsonFile<T> implements Json.File<T> {
@@ -53,8 +54,8 @@ class JsonFile<T> implements Json.File<T> {
     }
 
     @Override
-    public void write(T data) throws Io.Err {
-        Seed.Error<Io.Err> err = Seed.error(Io.Err.class);
+    public void write(T data) throws Json.Err, Io.Err {
+        Seed.Error<Json.Err> err = Seed.error(Json.Err.class);
         file.write((BufferedWriter w) -> {
             err.safeCall(() -> parser.write(data).to(w));
         });

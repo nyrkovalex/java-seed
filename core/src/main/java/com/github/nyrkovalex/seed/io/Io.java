@@ -1,4 +1,4 @@
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.io;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,7 +12,7 @@ public final class Io {
     }
 
     /**
-     * Creates a filesystem absraction that can be used as an external
+     * Creates a filesystem abstraction that can be used as an external
      * dependency for your classes
      *
      * @return {@link Fs} instance
@@ -113,11 +113,6 @@ public final class Io {
 
         Err(Throwable cause) {
             super(cause);
-        }
-
-        public static void rethrow(Object object) {
-            // TODO Auto-generated method stub
-
         }
 
         static void rethrow(VoidUnsafeCall call) throws Io.Err {

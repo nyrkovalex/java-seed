@@ -1,5 +1,5 @@
 
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.io;
 
 
 class IoFs implements Io.Fs {

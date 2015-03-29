@@ -1,14 +1,14 @@
 package com.github.nyrkovalex.seed.ssh;
 
 import com.github.nyrkovalex.seed.Expect;
-import com.github.nyrkovalex.seed.Seed;
+import com.github.nyrkovalex.seed.sys.Sys;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 public class ConsoleUserInfoTest extends Expect.Test {
 
-    @Mock private Seed.Console console;
+    @Mock private Sys.Console console;
     @InjectMocks private ConsoleUserInfo userInfo;
 
     @Test

@@ -18,7 +18,6 @@
         <module>test</module>
         <module>ssh</module>
         <module>json</module>
-        <module>db</module>
     </modules>
 
     <build>

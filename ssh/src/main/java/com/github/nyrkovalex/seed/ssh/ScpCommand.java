@@ -1,6 +1,7 @@
 package com.github.nyrkovalex.seed.ssh;
 
 import com.github.nyrkovalex.seed.Seed;
+import com.github.nyrkovalex.seed.sys.Sys;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -73,7 +74,7 @@ public class ScpCommand {
         JSch jsch = new JSch();
         jsch.addIdentity(System.getProperty("user.home") + "/.ssh/id_rsa");
         Session session = jsch.getSession(username, address);
-        session.setUserInfo(new ConsoleUserInfo(Seed.console()));
+        session.setUserInfo(new ConsoleUserInfo(Sys.console()));
         return session;
     }
 

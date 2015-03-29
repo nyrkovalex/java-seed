@@ -1,5 +1,5 @@
 
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.io;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.github.nyrkovalex.seed.Io.Err;
+import com.github.nyrkovalex.seed.io.Io.Err;
 
 class IoFile implements Io.File {
     private final Path path;

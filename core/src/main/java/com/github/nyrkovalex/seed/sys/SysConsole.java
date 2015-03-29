@@ -1,17 +1,16 @@
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.sys;
 
-import com.github.nyrkovalex.seed.Seed;
 import java.io.PrintWriter;
 
-class SeedConsole implements Seed.Console {
+class SysConsole implements Sys.Console {
 
-    private static final SeedConsole INSTANCE = new SeedConsole();
+    private static final SysConsole INSTANCE = new SysConsole();
 
-    public static SeedConsole instance() {
+    public static SysConsole instance() {
         return INSTANCE;
     }
 
-    private SeedConsole() {
+    SysConsole() {
     }
 
     @Override

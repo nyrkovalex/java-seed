@@ -1,7 +1,6 @@
-package com.github.nyrkovalex.seed.core;
+package com.github.nyrkovalex.seed.process;
 
 import com.github.nyrkovalex.seed.Expect;
-import com.github.nyrkovalex.seed.Chain;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;

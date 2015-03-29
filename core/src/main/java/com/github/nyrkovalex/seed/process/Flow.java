@@ -1,9 +1,9 @@
-package com.github.nyrkovalex.seed;
+package com.github.nyrkovalex.seed.process;
 
 /**
  * Continuous process abstraction where each step depends on previous step's output.
  * For a simple sequential invocation when no data is shared between steps see
- * {@link com.github.nyrkovalex.seed.Chain Chain}.
+ * {@link com.github.nyrkovalex.seed.process.Chain Chain}.
  * <pre>
  * // Example usage
  *
@@ -17,7 +17,7 @@ package com.github.nyrkovalex.seed;
  * // result.equals("Done!")
  * </pre>
  *
- * @see com.github.nyrkovalex.seed.Chain Chain
+ * @see com.github.nyrkovalex.seed.process.Chain Chain
  * @see com.github.nyrkovalex.seed.core.Flow.Producer
  * @see com.github.nyrkovalex.seed.core.Flow.Processor
  * @see Flow.Invocation
