@@ -4,12 +4,16 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Objects;
 
 class DbConnection implements Db.Connection {
 
 	private final Connection connection;
 
 	DbConnection(java.sql.Connection connection) {
+		Objects.requireNonNull(connection,
+				"Connection must not be null, check your connection string");
+
 		this.connection = connection;
 	}
 

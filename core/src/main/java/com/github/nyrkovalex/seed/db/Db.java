@@ -29,7 +29,8 @@ public class Db {
 
         public Connection with(Driver driver) throws Db.Err {
             try {
-                return new DbConnection(driver.connect(connectionString, null));
+				java.sql.Connection connection = driver.connect(connectionString, null);
+                return new DbConnection(connection);
             } catch (SQLException e) {
                 throw new Db.Err(e);
             }

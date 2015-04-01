@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -48,7 +50,13 @@ class PlugLoader implements Plugins.Path {
 	}
 
 	private ClassLoader createClassLoader(String path) {
-		List<URL> plugins = readDirectory(Paths.get(path));
+		final List<URL> plugins;
+		Path target = Paths.get(path);
+		if (Files.isDirectory(target)) {
+			plugins = readDirectory(Paths.get(path));
+		} else {
+			plugins = Arrays.asList(pathToUrl(target));
+		}
 		return new URLClassLoader(plugins.toArray(new URL[plugins.size()]));
 	}
 
