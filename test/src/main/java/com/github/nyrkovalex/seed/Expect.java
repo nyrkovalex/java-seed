@@ -48,7 +48,7 @@ public final class Expect {
         }
 
         public void returns(T value) {
-            Mockito.when(value).thenReturn(value);
+            Mockito.when(methodCall).thenReturn(value);
         }
     }
 
