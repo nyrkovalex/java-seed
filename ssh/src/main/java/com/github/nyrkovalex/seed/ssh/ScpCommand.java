@@ -1,7 +1,7 @@
 package com.github.nyrkovalex.seed.ssh;
 
 import com.github.nyrkovalex.seed.Seed;
-import com.github.nyrkovalex.seed.sys.Sys;
+import com.github.nyrkovalex.seed.Sys;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;

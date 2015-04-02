@@ -1,5 +1,6 @@
 package com.github.nyrkovalex.seed.process;
 
+import com.github.nyrkovalex.seed.Flow;
 import com.github.nyrkovalex.seed.Expect;
 import org.junit.Before;
 import org.junit.Test;

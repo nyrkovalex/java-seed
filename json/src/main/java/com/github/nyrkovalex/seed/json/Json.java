@@ -1,7 +1,7 @@
 package com.github.nyrkovalex.seed.json;
 
 import com.github.nyrkovalex.seed.Seed;
-import com.github.nyrkovalex.seed.io.Io;
+import com.github.nyrkovalex.seed.Io;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Optional;

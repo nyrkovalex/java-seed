@@ -23,7 +23,7 @@
  */
 package com.github.nyrkovalex.seed.json;
 
-import com.github.nyrkovalex.seed.io.Io;
+import com.github.nyrkovalex.seed.Io;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;

@@ -24,7 +24,7 @@
 package com.github.nyrkovalex.seed.json;
 
 import com.github.nyrkovalex.seed.*;
-import com.github.nyrkovalex.seed.io.Io;
+import com.github.nyrkovalex.seed.Io;
 import java.io.BufferedWriter;
 import java.util.Optional;
 

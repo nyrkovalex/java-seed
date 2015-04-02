@@ -1,4 +1,4 @@
-package com.github.nyrkovalex.seed.process;
+package com.github.nyrkovalex.seed;
 
 
 import java.util.ArrayList;

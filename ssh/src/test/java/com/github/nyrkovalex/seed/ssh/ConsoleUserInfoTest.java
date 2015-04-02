@@ -1,7 +1,7 @@
 package com.github.nyrkovalex.seed.ssh;
 
 import com.github.nyrkovalex.seed.Expect;
-import com.github.nyrkovalex.seed.sys.Sys;
+import com.github.nyrkovalex.seed.Sys;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

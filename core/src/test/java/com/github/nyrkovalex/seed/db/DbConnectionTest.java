@@ -1,5 +1,6 @@
 package com.github.nyrkovalex.seed.db;
 
+import com.github.nyrkovalex.seed.Db;
 import com.github.nyrkovalex.seed.Expect;
 import java.util.HashMap;
 import java.util.Map;
