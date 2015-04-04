@@ -37,7 +37,7 @@ public final class Seed {
     }
 
     private Seed() {
-        // Non-instantiable
+        // Module
     }
 
 
@@ -208,21 +208,29 @@ public final class Seed {
          * </p>
          * @param call
          */
-        void safeCall(UnsafeCallable call);
-
-        /**
-         * A functional call that can produce an error.
-         */
-        @FunctionalInterface
-        public static interface UnsafeCallable {
-
-            /**
-             * Do something that can throw an exception of type T
-             * @throws Exception if something nasty happenes
-             */
-            void call() throws Exception;
-        }
+        void safeCall(VoidUnsafeCall call);
     }
+
+
+	/**
+	 * Lambda that can fail with exception returning some output.
+	 *
+	 * @param <T> type on an output produced by lambda
+	 */
+	@FunctionalInterface
+	public static interface UnsafeCall<T> {
+
+		T call() throws Exception;
+	}
+
+	/**
+	 * Lambda that can fail with exception doing void call.
+	 */
+	@FunctionalInterface
+	public static interface VoidUnsafeCall {
+
+		void call() throws Exception;
+	}
 }
 
 
@@ -252,7 +260,7 @@ class SeedError<T extends Throwable> implements Seed.Error<T> {
     }
 
     @Override
-    public void safeCall(Seed.Error.UnsafeCallable callable) {
+    public void safeCall(Seed.VoidUnsafeCall callable) {
         try {
             callable.call();
         } catch (Throwable t) {

@@ -142,14 +142,11 @@ public final class Io {
 	 * See its reason for details.
 	 */
 	public static class Err extends Exception {
-
-		private static final long serialVersionUID = 1L;
-
 		Err(Throwable cause) {
 			super(cause);
 		}
 
-		static void rethrow(VoidUnsafeCall call) throws Io.Err {
+		static void rethrow(Seed.VoidUnsafeCall call) throws Io.Err {
 			try {
 				call.call();
 			} catch (Exception ex) {
@@ -164,24 +161,12 @@ public final class Io {
 			return new Io.Err(ex);
 		}
 
-		static <T> T rethrow(UnsafeCall<T> call) throws Io.Err {
+		static <T> T rethrow(Seed.UnsafeCall<T> call) throws Io.Err {
 			try {
 				return call.call();
 			} catch (Exception ex) {
 				throw from(ex);
 			}
-		}
-
-		@FunctionalInterface
-		static interface UnsafeCall<T> {
-
-			T call() throws Exception;
-		}
-
-		@FunctionalInterface
-		static interface VoidUnsafeCall {
-
-			void call() throws Exception;
 		}
 	}
 
