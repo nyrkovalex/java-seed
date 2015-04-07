@@ -1,7 +1,7 @@
 package com.github.nyrkovalex.seed.process;
 
 import com.github.nyrkovalex.seed.Flow;
-import com.github.nyrkovalex.seed.Expect;
+import com.github.nyrkovalex.seed.Tests;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -11,7 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class FlowTest extends Expect.Test {
+public class FlowTest extends Tests.Expect {
 
     private static final String RESULT = "result";
     @Mock private Flow.Processor<Integer, String> step;

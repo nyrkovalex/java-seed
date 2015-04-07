@@ -1,7 +1,7 @@
 package com.github.nyrkovalex.seed.db;
 
 import com.github.nyrkovalex.seed.Db;
-import com.github.nyrkovalex.seed.Expect;
+import com.github.nyrkovalex.seed.Tests;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;
@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import org.junit.Before;
 
-public class DbConnectionTest extends Expect.Test {
+public class DbConnectionTest extends Tests.Expect {
 
 	Db.Connection conn;
 
