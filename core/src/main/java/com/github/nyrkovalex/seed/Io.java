@@ -7,8 +7,16 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
+
+import com.github.nyrkovalex.seed.Io.Entity;
+import com.github.nyrkovalex.seed.Io.Err;
+import com.github.nyrkovalex.seed.Io.File;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class Io {
 
@@ -25,17 +33,7 @@ public final class Io {
 		return IoFs.instance();
 	}
 
-	/**
-	 * Easy to use file abstraction suitable for mocking
-	 */
-	public static interface File {
-
-		/**
-		 * Deletes target file or directory with its contents, just like <code>rm -rf</code> would
-		 *
-		 * @throws Io.Err if something goes wrong
-		 */
-		void deleteWithContents() throws Io.Err;
+	public static interface Entity {
 
 		/**
 		 * Check whether file with a given path exists
@@ -50,6 +48,20 @@ public final class Io {
 		 * @return target path
 		 */
 		String path();
+
+		/**
+		 * Delets current {@link Fs.Entity}
+		 *
+		 * @throws Io.Err if something goes wrong
+		 */
+		void delete() throws Io.Err;
+
+	}
+
+	/**
+	 * Easy to use file abstraction suitable for mocking
+	 */
+	public static interface File extends Entity {
 
 		/**
 		 * Creates a {@link BufferedReader} reading current file bytes
@@ -123,6 +135,10 @@ public final class Io {
 		void write(Consumer<BufferedWriter> handler) throws Io.Err;
 	}
 
+	public static interface Dir extends Entity {
+        Stream<Entity> stream() throws Err;
+	}
+
 	/**
 	 * Filesystem abstraction mostly for dependency injection and easy mocking
 	 */
@@ -133,8 +149,26 @@ public final class Io {
 		 *
 		 * @param path path to a file
 		 * @return {@link Io.File} instance bound to a given path
+		 * @throws Io.Err if this <code>path</code> corresponds to a directory
 		 */
-		File file(String path);
+		File file(String path) throws Io.Err;
+
+		/**
+		 * Creates a {@link Io.Dir} instance on a given path
+		 *
+		 * @param path directory path
+		 * @return {@link Io.Dir} object bound to a given path
+		 * @throws Io.Err if <code>path</code> corresponds to a file
+		 */
+		Dir dir(String path) throws Io.Err;
+
+		/**
+		 * Creates a directory in a system standard tmp location
+		 *
+		 * @return temporary {@link Io.Dir}
+		 * @throws Io.Err if something goes wrong
+		 */
+		Dir tempDir() throws Io.Err;
 	}
 
 	/**
@@ -142,6 +176,11 @@ public final class Io {
 	 * See its reason for details.
 	 */
 	public static class Err extends Exception {
+
+		Err(String message) {
+			super(message);
+		}
+
 		Err(Throwable cause) {
 			super(cause);
 		}
@@ -172,18 +211,42 @@ public final class Io {
 
 }
 
-class IoFile implements Io.File {
 
-	private final Path path;
+abstract class IoEntity implements Io.Entity {
+    protected final Path path;
 
-	IoFile(String path) {
-		this.path = Paths.get(path);
+    IoEntity(String path) {
+        this(Paths.get(path));
+    }
+
+    IoEntity(Path path) {
+        this.path = path;
+    }
+
+    @Override
+    public String path() {
+        return path.toString();
+    }
+}
+
+
+class IoFile extends IoEntity implements Io.File {
+
+    IoFile(String strpath) throws Err {
+        super(strpath);
+		throwIfDirectory();
+    }
+
+	private void throwIfDirectory() throws Err {
+		if (Files.isDirectory(path)) {
+			throw new Io.Err(path() + " is a directory");
+		}
 	}
 
-	@Override
-	public String path() {
-		return path.toString();
-	}
+    IoFile(Path path) throws Err {
+        super(path);
+		throwIfDirectory();
+    }
 
 	@Override
 	public void write(byte[] data) throws Io.Err {
@@ -237,28 +300,58 @@ class IoFile implements Io.File {
 		});
 	}
 
-	@Override
-	public void deleteWithContents() throws Io.Err {
-		try {
-			recurseDelete(path);
-		} catch (RuntimeException ex) {
-			throw new Io.Err(ex.getCause());
-		}
-	}
-
-	private static void recurseDelete(Path f) throws RuntimeException {
-		try {
-			if (Files.isDirectory(f)) {
-				Files.list(f).forEach(IoFile::recurseDelete);
-			}
-			Files.deleteIfExists(f);
-		} catch (IOException ex) {
-			// Propagate as runtime exception so we can use method reference above
-			throw new RuntimeException(ex);
-		}
-	}
-
+    @Override
+    public void delete() throws Err {
+	    Io.Err.rethrow(() -> Files.delete(path));
+    }
 }
+
+
+class IoDir extends IoEntity implements Io.Dir {
+
+    IoDir(String strpath) throws Err {
+       super(strpath);
+	   throwIfFile();
+    }
+
+    IoDir(Path path) throws Err {
+        super(path);
+		throwIfFile();
+    }
+
+	private void throwIfFile() throws Err {
+		if (!Files.isDirectory(path)) {
+			throw new Io.Err(path() + " is a directory");
+		}
+	}
+
+    @Override
+    public boolean exists() {
+        return Files.exists(path) && Files.isDirectory(path);
+    }
+
+	@Override
+	public void delete() throws Io.Err {
+		for (Io.Entity e : stream().collect(Collectors.toList())) {
+			e.delete();
+        }
+	}
+
+    @Override
+    public Stream<Io.Entity> stream() throws Io.Err {
+		Seed.Error<Err> error = Seed.error(Io.Err.class);
+		Stream<Io.Entity> stream = Io.Err.rethrow(() -> Files
+				.list(path)
+				.map(f -> error.safeCall(() -> Files.isDirectory(f)
+						? new IoDir(f)
+						: new IoFile(f))))
+				.filter(Optional::isPresent)
+				.map(Optional::get);
+		error.rethrow();
+		return stream;
+    }
+}
+
 
 class IoFs implements Io.Fs {
 
@@ -272,7 +365,17 @@ class IoFs implements Io.Fs {
 	}
 
 	@Override
-	public Io.File file(String path) {
+	public Io.File file(String path) throws Err {
 		return new IoFile(path);
+	}
+
+	@Override
+	public Io.Dir tempDir() throws Io.Err {
+		return Io.Err.rethrow(() -> new IoDir(Files.createTempDirectory("")));
+	}
+
+	@Override
+	public Io.Dir dir(String path) throws Err {
+		return new IoDir(path);
 	}
 }

@@ -3,13 +3,10 @@ package com.github.nyrkovalex.seed;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 
-@SuppressWarnings("UnusedDeclaration")
 public final class Tests {
     // This class is factored out to standalone module to be used as a dependency with `test` scope
 

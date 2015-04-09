@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-@SuppressWarnings("UnusedDeclaration")
 public final class Seed {
 
     /**
@@ -194,13 +193,13 @@ public final class Seed {
         /**
          * Throws error captured or does nothing if no error was caught.
          *
-         * @throws T if something nasty happenes
+         * @throws T if something nasty happens
          */
         void rethrow() throws T;
 
         /**
          * <p>
-         * Calls an {@link UnsafeCallable} capturing any exception of an expected type and
+         * Calls an {@link VoidUnsafeCall} capturing any exception of an expected type and
          * throwing a {@link RuntimeException} wrapping a throwable of any other type if thrown.
          * </p>
          * <p>
@@ -209,6 +208,20 @@ public final class Seed {
          * @param call
          */
         void safeCall(VoidUnsafeCall call);
+
+		/**
+         * <p>
+         * Calls an {@link UnsafeCall} capturing any exception of an expected type and
+         * throwing a {@link RuntimeException} wrapping a throwable of any other type if thrown.
+         * </p>
+         * <p>
+         * <i>Don't go suicidal. Never use this to silence an error.</i>
+         * </p>
+		 * @param <T> type of a lambda result
+		 * @param call lambda to wrap
+		 * @return result of <code>call</code> invocation
+		 */
+		<T> Optional<T> safeCall(UnsafeCall<T> call);
     }
 
 
@@ -270,4 +283,18 @@ class SeedError<T extends Throwable> implements Seed.Error<T> {
             propagate(errClass.cast(t));
         }
     }
+
+	@Override
+	public <T> Optional<T> safeCall(Seed.UnsafeCall<T> call) {
+		Optional<T> result = Optional.empty();
+		try {
+			result = Optional.of(call.call());
+        } catch (Throwable t) {
+            if (!errClass.isInstance(t)) {
+                throw new RuntimeException(t);
+            }
+            propagate(errClass.cast(t));
+        }
+		return result;
+	}
 }
