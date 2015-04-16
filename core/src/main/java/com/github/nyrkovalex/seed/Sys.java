@@ -1,22 +1,21 @@
-
 package com.github.nyrkovalex.seed;
 
 import java.io.PrintWriter;
 import java.time.Instant;
 
 public final class Sys {
-	private Sys() {
-		// Module
-	}
 
-	public static Console console() {
-		return new SysConsole();
-	}
+    private Sys() {
+        // Module
+    }
 
-	public static Clock clock() {
-		return () -> Instant.now();
-	}
+    public static Console console() {
+        return new SysConsole();
+    }
 
+    public static Clock clock() {
+        return () -> Instant.now();
+    }
 
     /**
      * Simple console abstraction. Can be used for dependency injection and mocking
@@ -49,36 +48,38 @@ public final class Sys {
         String readSecure(String prompt);
     }
 
-	public static interface Clock {
-		public Instant now();
-	}
-}
+    public static interface Clock {
 
-class SysConsole implements Sys.Console {
-
-    private static final SysConsole INSTANCE = new SysConsole();
-
-    public static SysConsole instance() {
-        return INSTANCE;
+        public Instant now();
     }
 
-    SysConsole() {
-    }
+    private static class SysConsole implements Sys.Console {
 
-    @Override
-    public String read(String prompt) {
-        return System.console().readLine(prompt);
-    }
+        private static final SysConsole INSTANCE = new SysConsole();
 
-    @Override
-    public String readSecure(String prompt) {
-        return String.copyValueOf(System.console().readPassword(prompt));
-    }
+        public static SysConsole instance() {
+            return INSTANCE;
+        }
 
-    @Override
-    public void printf(String message, Object... args) {
-        try (PrintWriter writer = System.console().writer()) {
-            writer.printf(message, args);
+        SysConsole() {
+        }
+
+        @Override
+        public String read(String prompt) {
+            return System.console().readLine(prompt);
+        }
+
+        @Override
+        public String readSecure(String prompt) {
+            return String.copyValueOf(System.console().readPassword(prompt));
+        }
+
+        @Override
+        public void printf(String message, Object... args) {
+            try (PrintWriter writer = System.console().writer()) {
+                writer.printf(message, args);
+            }
         }
     }
+
 }

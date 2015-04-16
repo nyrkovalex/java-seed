@@ -3,7 +3,6 @@ package com.github.nyrkovalex.seed;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Optional;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -22,17 +21,6 @@ public final class Seed {
      */
     public static Logger logger(Class<?> clazz) {
         return Logger.getLogger(clazz.getName());
-    }
-
-    /**
-     * Creates an {@link Seed.Error} instance for capturing exceptions of type <code>T</code>
-     *
-     * @param <T> type of exception this error object will catch
-     * @param errClass class of an expected exception
-     * @return {@link Seed.Error} capable of catching exceptions of type <code>T</code>
-     */
-    public static <T extends Throwable> Error<T> error(Class<T> errClass) {
-        return new SeedError<>(errClass);
     }
 
     private Seed() {
@@ -170,131 +158,4 @@ public final class Seed {
 
     }
 
-    /**
-     * <p>
-     * Wraps an exception instance, can be used to rethrow an exception captured from lambda.
-     * </p>
-     * <p>
-     * Not thread-safe
-     * </p>
-     *
-     * @param <T> type of ann error to catch
-     */
-    public static interface Error<T extends Throwable> {
-
-        /**
-         * Catches a throwable for further propagation.
-         *
-         * @param err
-         * @throws IllegalStateException
-         */
-        void propagate(T err) throws IllegalStateException;
-
-        /**
-         * Throws error captured or does nothing if no error was caught.
-         *
-         * @throws T if something nasty happens
-         */
-        void rethrow() throws T;
-
-        /**
-         * <p>
-         * Calls an {@link VoidUnsafeCall} capturing any exception of an expected type and
-         * throwing a {@link RuntimeException} wrapping a throwable of any other type if thrown.
-         * </p>
-         * <p>
-         * <i>Don't go suicidal. Never use this to silence an error.</i>
-         * </p>
-         * @param call
-         */
-        void safeCall(VoidUnsafeCall call);
-
-		/**
-         * <p>
-         * Calls an {@link UnsafeCall} capturing any exception of an expected type and
-         * throwing a {@link RuntimeException} wrapping a throwable of any other type if thrown.
-         * </p>
-         * <p>
-         * <i>Don't go suicidal. Never use this to silence an error.</i>
-         * </p>
-		 * @param <T> type of a lambda result
-		 * @param call lambda to wrap
-		 * @return result of <code>call</code> invocation
-		 */
-		<T> Optional<T> safeCall(UnsafeCall<T> call);
-    }
-
-
-	/**
-	 * Lambda that can fail with exception returning some output.
-	 *
-	 * @param <T> type on an output produced by lambda
-	 */
-	@FunctionalInterface
-	public static interface UnsafeCall<T> {
-
-		T call() throws Exception;
-	}
-
-	/**
-	 * Lambda that can fail with exception doing void call.
-	 */
-	@FunctionalInterface
-	public static interface VoidUnsafeCall {
-
-		void call() throws Exception;
-	}
-}
-
-
-class SeedError<T extends Throwable> implements Seed.Error<T> {
-    private final Class<T> errClass;
-    private Optional<T> err;
-
-    public SeedError(Class<T> errClass) {
-        this.errClass = errClass;
-        err = Optional.empty();
-    }
-
-    @Override
-    public void rethrow() throws T {
-        if (err.isPresent()) {
-            throw err.get();
-        }
-    }
-
-    @Override
-    public void propagate(T err) throws IllegalStateException {
-        if (this.err.isPresent()) {
-            throw new IllegalStateException(
-                    "Error already set, cannot propagate more than one exception");
-        }
-        this.err = Optional.of(err);
-    }
-
-    @Override
-    public void safeCall(Seed.VoidUnsafeCall callable) {
-        try {
-            callable.call();
-        } catch (Throwable t) {
-            if (!errClass.isInstance(t)) {
-                throw new RuntimeException(t);
-            }
-            propagate(errClass.cast(t));
-        }
-    }
-
-	@Override
-	public <T> Optional<T> safeCall(Seed.UnsafeCall<T> call) {
-		Optional<T> result = Optional.empty();
-		try {
-			result = Optional.of(call.call());
-        } catch (Throwable t) {
-            if (!errClass.isInstance(t)) {
-                throw new RuntimeException(t);
-            }
-            propagate(errClass.cast(t));
-        }
-		return result;
-	}
 }
