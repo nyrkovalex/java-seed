@@ -204,6 +204,11 @@ public final class Io {
         public String path() {
             return path.toString();
         }
+
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName() + " at " + path;
+        }
     }
 
     private static class IoFile extends IoEntity implements Io.File {

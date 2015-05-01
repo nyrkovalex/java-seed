@@ -1,5 +1,7 @@
 package com.github.nyrkovalex.seed;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Instant;
 
@@ -10,17 +12,21 @@ public final class Sys {
     }
 
     public static Console console() {
-        return new SysConsole();
+        return SysConsole.instance();
     }
 
     public static Clock clock() {
         return () -> Instant.now();
     }
 
+    public static Env env() {
+        return SysEnv.instance();
+    }
+
     /**
      * Simple console abstraction. Can be used for dependency injection and mocking
      */
-    public static interface Console {
+    public interface Console {
 
         /**
          * Prints formatted output to a console
@@ -48,38 +54,75 @@ public final class Sys {
         String readSecure(String prompt);
     }
 
-    public static interface Clock {
-
-        public Instant now();
+    public interface Clock {
+        Instant now();
     }
 
-    private static class SysConsole implements Sys.Console {
+    public interface Env {
+        String read(String varName);
+        String cwd();
+        String userHome();
+    }
+}
 
-        private static final SysConsole INSTANCE = new SysConsole();
+class SysConsole implements Sys.Console {
 
-        public static SysConsole instance() {
-            return INSTANCE;
+    private static final SysConsole INSTANCE = new SysConsole();
+
+    public static SysConsole instance() {
+        return INSTANCE;
+    }
+
+    SysConsole() {
+    }
+
+    @Override
+    public String read(String prompt) {
+        return System.console().readLine(prompt);
+    }
+
+    @Override
+    public String readSecure(String prompt) {
+        return String.copyValueOf(System.console().readPassword(prompt));
+    }
+
+    @Override
+    public void printf(String message, Object... args) {
+        try (PrintWriter writer = System.console().writer()) {
+            writer.printf(message, args);
         }
+    }
+}
 
-        SysConsole() {
-        }
+class SysEnv implements Sys.Env {
 
-        @Override
-        public String read(String prompt) {
-            return System.console().readLine(prompt);
-        }
+    private static final SysEnv INSTANCE = new SysEnv();
 
-        @Override
-        public String readSecure(String prompt) {
-            return String.copyValueOf(System.console().readPassword(prompt));
-        }
+    private SysEnv() {
+        // Singleton
+    }
 
-        @Override
-        public void printf(String message, Object... args) {
-            try (PrintWriter writer = System.console().writer()) {
-                writer.printf(message, args);
-            }
+    public static SysEnv instance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public String read(String varName) {
+        return System.getenv(varName);
+    }
+
+    @Override
+    public String cwd() {
+        try {
+            return new File(".").getCanonicalPath();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
+    }
+
+    @Override
+    public String userHome() {
+        return System.getProperty("user.home");
     }
 
 }
