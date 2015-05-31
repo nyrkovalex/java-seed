@@ -49,6 +49,14 @@ public final class Tests {
         public void returns(T value) {
             Mockito.when(methodCall).thenReturn(value);
         }
+
+        public <E extends Throwable> void failsWith(E err) {
+            Mockito.when(methodCall).thenThrow(err);
+        }
+
+        public <E extends Throwable> void failsWith(Class<E> errClass) {
+            Mockito.when(methodCall).thenThrow(errClass);
+        }
     }
 
     /**

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -53,6 +54,8 @@ public final class Io {
          * @throws Io.Err if something goes wrong
          */
         void delete() throws Io.Err;
+
+        String name();
 
     }
 
@@ -128,6 +131,8 @@ public final class Io {
          * @throws Io.Err if something goes wrong during I/O
          */
         void write(Consumer<BufferedWriter> handler) throws Io.Err;
+
+        void copyTo(File target) throws Io.Err;
     }
 
     public interface Dir extends Entity {
@@ -143,20 +148,22 @@ public final class Io {
         /**
          * Creates a {@link Io.File} instance on a given path
          *
-         * @param path path to a file
+         * @param first first part of a file path
+         * @param more other parts of a file path
          * @return {@link Io.File} instance bound to a given path
          * @throws Io.Err if this <code>path</code> corresponds to a directory
          */
-        File file(String path) throws Io.Err;
+        File file(String first, String... more) throws Io.Err;
 
         /**
          * Creates a {@link Io.Dir} instance on a given path
          *
-         * @param path directory path
+         * @param first first part of a dir path
+         * @param more other parts of a dir path
          * @return {@link Io.Dir} object bound to a given path
          * @throws Io.Err if <code>path</code> corresponds to a file
          */
-        Dir dir(String path) throws Io.Err;
+        Dir dir(String first, String... more) throws Io.Err;
 
         /**
          * Creates a directory in a system standard tmp location
@@ -192,8 +199,8 @@ public final class Io {
 
         protected final Path path;
 
-        IoEntity(String path) {
-            this(Paths.get(path));
+        IoEntity(String first, String... more) {
+            this(Paths.get(first, more));
         }
 
         IoEntity(Path path) {
@@ -209,12 +216,17 @@ public final class Io {
         public String toString() {
             return this.getClass().getSimpleName() + " at " + path;
         }
+
+        @Override
+        public String name() {
+            return path.getFileName().toString();
+        }
     }
 
     private static class IoFile extends IoEntity implements Io.File {
 
-        IoFile(String strpath) throws Err {
-            super(strpath);
+        IoFile(String first, String... more) throws Err {
+            super(first, more);
             throwIfDirectory();
         }
 
@@ -285,12 +297,21 @@ public final class Io {
         public void delete() throws Err {
             Errors.rethrow(() -> Files.delete(path), Err::from);
         }
+
+        @Override
+        public void copyTo(File target) throws Err {
+            Errors.rethrow(() -> Files.copy(
+                    this.path,
+                    ((IoEntity)target).path,
+                    StandardCopyOption.REPLACE_EXISTING
+            ), Err::from);
+        }
     }
 
     private static class IoDir extends IoEntity implements Io.Dir {
 
-        IoDir(String strpath) throws Err {
-            super(strpath);
+        IoDir(String first, String... more) throws Err {
+            super(first, more);
             throwIfFile();
         }
 
@@ -344,8 +365,8 @@ public final class Io {
         }
 
         @Override
-        public Io.File file(String path) throws Err {
-            return new IoFile(path);
+        public Io.File file(String first, String... more) throws Err {
+            return new IoFile(first, more);
         }
 
         @Override
@@ -354,8 +375,8 @@ public final class Io {
         }
 
         @Override
-        public Io.Dir dir(String path) throws Err {
-            return new IoDir(path);
+        public Io.Dir dir(String first, String... more) throws Err {
+            return new IoDir(first, more);
         }
     }
 
