@@ -335,6 +335,7 @@ public final class Io {
       for (Io.Entity e : stream().collect(Collectors.toList())) {
         e.delete();
       }
+      Errors.rethrow(() -> Files.delete(path), Err::from);
     }
 
     @Override
