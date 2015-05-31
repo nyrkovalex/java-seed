@@ -1,0 +1,17 @@
+{
+  "builder": {
+    "class": "com.github.nyrkovalex.get.me.mvn.MvnBuilder",
+    "params": {
+      "goals": [
+        "clean",
+        "package"
+      ]
+    }
+  },
+  "installer": {
+    "class": "com.github.nyrkovalex.get.me.mvn.MvnInstaller",
+    "params": {
+      "jar": "target/get.me.jar"
+    }
+  }
+}
