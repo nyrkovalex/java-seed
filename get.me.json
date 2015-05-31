@@ -9,9 +9,6 @@
     }
   },
   "installer": {
-    "class": "com.github.nyrkovalex.get.me.mvn.MvnInstaller",
-    "params": {
-      "jar": "target/get.me.jar"
-    }
+    "class": "com.github.nyrkovalex.get.me.mvn.MvnInstaller"
   }
 }
