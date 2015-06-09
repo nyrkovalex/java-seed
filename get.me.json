@@ -1,14 +1,11 @@
-{
-  "builder": {
+[
+  {
     "class": "com.github.nyrkovalex.get.me.mvn.MvnBuilder",
     "params": {
       "goals": [
         "clean",
-        "package"
+        "install"
       ]
     }
-  },
-  "installer": {
-    "class": "com.github.nyrkovalex.get.me.mvn.MvnInstaller"
   }
-}
+]
