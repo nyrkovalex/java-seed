@@ -7,17 +7,20 @@
   <groupId>com.github.nyrkovalex</groupId>
   <artifactId>seed</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-alpha</version>
+  <version>0.1-alpha2</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <modules>
-    <module>core</module>
-    <module>test</module>
-    <module>ssh</module>
-    <module>json</module>
+    <module>seed-core</module>
+    <module>seed-test</module>
+    <module>seed-ssh</module>
+    <module>seed-fs</module>
+    <module>seed-logging</module>
+    <module>seed-plugins</module>
+    <module>seed-db</module>
   </modules>
 
   <build>
