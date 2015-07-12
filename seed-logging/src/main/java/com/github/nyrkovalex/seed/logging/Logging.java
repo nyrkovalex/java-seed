@@ -32,10 +32,8 @@ public final class Logging {
 	 * argument provided and
 	 * {@link com.github.nyrkovalex.seed.core.Seed.Logging.DetailedFormatter}
 	 *
-	 * @param debugEnabled
-	 *          whether log debug statements (lower than {@link Level#INFO} or not
-	 * @param clazz
-	 *          apply such settings to target class' package and its children
+	 * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
+	 * @param clazz        apply such settings to target class' package and its children
 	 */
 	public static void init(boolean debugEnabled, Class<?> clazz) {
 		init(debugEnabled, clazz.getPackage().getName());
@@ -46,10 +44,8 @@ public final class Logging {
 	 * argument provided and
 	 * {@link com.github.nyrkovalex.seed.core.Seed.Logging.DetailedFormatter}
 	 *
-	 * @param debugEnabled
-	 *          whether log debug statements (lower than {@link Level#INFO} or not
-	 * @param rootPackage
-	 *          apply such settings to target package and its children
+	 * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
+	 * @param rootPackage  apply such settings to target package and its children
 	 */
 	public static void init(boolean debugEnabled, String rootPackage) {
 		init(debugEnabled, rootPackage, debugEnabled ? new DetailedFormatter() : new StdOutFormatter());
@@ -59,12 +55,9 @@ public final class Logging {
 	 * Initializes root {@link Logger} and its {@link Handler}s depending on
 	 * argument provided
 	 *
-	 * @param debugEnabled
-	 *          whether log debug statements (lower than {@link Level#INFO} or not
-	 * @param clazz
-	 *          apply such settings to target class' package and its children
-	 * @param formatter
-	 *          formatter to be used for all loggers
+	 * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
+	 * @param clazz        apply such settings to target class' package and its children
+	 * @param formatter    formatter to be used for all loggers
 	 */
 	public static void init(boolean debugEnabled, Class<?> clazz, Formatter formatter) {
 		init(debugEnabled, clazz.getPackage().getName(), formatter);
@@ -74,12 +67,9 @@ public final class Logging {
 	 * Initializes root {@link Logger} and its {@link Handler}s depending on
 	 * argument provided
 	 *
-	 * @param debugEnabled
-	 *          whether log debug statements (lower than {@link Level#INFO} or not
-	 * @param rootPackage
-	 *          apply such settings to target package and its children
-	 * @param formatter
-	 *          formatter to be used for all loggers
+	 * @param debugEnabled whether log debug statements (lower than {@link Level#INFO} or not
+	 * @param rootPackage  apply such settings to target package and its children
+	 * @param formatter    formatter to be used for all loggers
 	 */
 	public static void init(boolean debugEnabled, String rootPackage, Formatter formatter) {
 		Level targetLevel = debugEnabled ? Level.FINEST : Level.INFO;
@@ -101,8 +91,8 @@ public final class Logging {
 		@Override
 		public String format(LogRecord record) {
 			return String.format("%s [ %s ] - %s: %s\n",
-					new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS").format(new Date(record.getMillis())), record.getLevel(),
-					record.getSourceClassName(), record.getMessage());
+			                     new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS").format(new Date(record.getMillis())), record.getLevel(),
+			                     record.getSourceClassName(), record.getMessage());
 		}
 	}
 
