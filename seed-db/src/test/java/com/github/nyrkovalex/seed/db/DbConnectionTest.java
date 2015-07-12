@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class DbConnectionTest {
 		conn.close();
 	}
 
-	private int userCount() throws Db.Err {
+	private int userCount() throws SQLException {
 		int[] wrap = { 0 };
 		conn.one("select count(*) from users", rs -> {
 			wrap[0] = rs.getInt(1);
@@ -99,7 +100,7 @@ public class DbConnectionTest {
 				t.run("insert into users(id, name) values (4, 'Jesus')");
 				throw new RuntimeException("Something bad happened");
 			});
-		} catch (Db.Err err) {
+		} catch (SQLException err) {
 			// That's OK
 		}
 		assertThat(userCount(), is(3));
