@@ -37,7 +37,7 @@ class ConsoleUserInfo implements UserInfo {
 
 	@Override
 	public boolean promptYesNo(String message) {
-		return console.read(beautify(message)).equalsIgnoreCase("y");
+		return console.readLine(beautify(message)).equalsIgnoreCase("y");
 	}
 
 	private static String beautify(String message) {

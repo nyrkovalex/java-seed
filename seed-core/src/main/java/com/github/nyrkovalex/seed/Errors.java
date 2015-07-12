@@ -35,7 +35,7 @@ public class Errors {
 	 *
 	 * @param <T>      type of exception this catcher object will catch
 	 * @param errClass class of an expected exception
-	 * @return {@link Seed.Catcher} capable of catching exceptions of type <code>T</code>
+	 * @return {@link Errors.Catcher} capable of catching exceptions of type <code>T</code>
 	 */
 	public static <T extends Throwable> Catcher<T> catcher(Class<T> errClass) {
 		return new ErrorsCatcher<>(errClass);

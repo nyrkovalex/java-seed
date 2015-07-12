@@ -1,6 +1,5 @@
 package com.github.nyrkovalex.seed.db;
 
-import com.github.nyrkovalex.seed.Tests;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,7 +7,10 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DbConnectionTest extends Tests.Expect {
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+public class DbConnectionTest {
 
 	Db.Connection conn;
 
@@ -36,27 +38,27 @@ public class DbConnectionTest extends Tests.Expect {
 
 	@Test
 	public void testShouldCountUsers() throws Exception {
-		expect(userCount()).toBe(3);
+		assertThat(userCount(), is(3));
 	}
 
 	@Test
 	public void testShouldRemoveOneUser() throws Exception {
 		conn.run("delete from users where id = 3");
-		expect(userCount()).toBe(2);
+		assertThat(userCount(), is(2));
 	}
 
 	@Test
 	public void testShouldUpdateOneUser() throws Exception {
 		conn.run("update users set name = 'Lebowski' where id = 1");
 		conn.one("select name from users where id = 1", rs -> {
-			expect(rs.getString(1)).toBe("Lebowski");
+			assertThat(rs.getString(1), is("Lebowski"));
 		});
 	}
 
 	@Test
 	public void testShouldInsertOneUser() throws Exception {
 		conn.run("insert into users(id, name) values (4, 'Jesus')");
-		expect(userCount()).toBe(4);
+		assertThat(userCount(), is(4));
 	}
 
 	@Test
@@ -67,7 +69,7 @@ public class DbConnectionTest extends Tests.Expect {
 		names.put(2, "Donny");
 		conn.query("select * from users order by id", rs -> {
 			for (int i = 0; rs.next(); i++) {
-				expect(rs.getString("name")).toBe(names.get(i));
+				assertThat(rs.getString("name"), is(names.get(i)));
 			}
 		});
 	}
@@ -78,7 +80,7 @@ public class DbConnectionTest extends Tests.Expect {
 			t.run("insert into users(id, name) values (4, 'Jesus')");
 			return true;
 		});
-		expect(userCount()).toBe(4);
+		assertThat(userCount(), is(4));
 	}
 
 	@Test
@@ -87,7 +89,7 @@ public class DbConnectionTest extends Tests.Expect {
 			t.run("insert into users(id, name) values (4, 'Jesus')");
 			return false;
 		});
-		expect(userCount()).toBe(3);
+		assertThat(userCount(), is(3));
 	}
 
 	@Test
@@ -100,6 +102,6 @@ public class DbConnectionTest extends Tests.Expect {
 		} catch (Db.Err err) {
 			// That's OK
 		}
-		expect(userCount()).toBe(3);
+		assertThat(userCount(), is(3));
 	}
 }

@@ -1,7 +1,5 @@
 package com.github.nyrkovalex.seed.db;
 
-import com.github.nyrkovalex.seed.Errors;
-
 import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,17 +13,13 @@ public class Db {
 	}
 
 	public interface Runner {
-
-		void run(String sql) throws Db.Err;
-
-		void one(String string, VoidCallback callback) throws Db.Err;
-
-		void query(String sql, VoidCallback callback) throws Db.Err;
+		void run(String sql) throws SQLException;
+		void one(String sql, VoidCallback callback) throws SQLException;
+		void query(String sql, VoidCallback callback) throws SQLException;
 	}
 
 	public interface Connection extends Runner, AutoCloseable {
-
-		void transaction(TransactionCallback callback) throws Db.Err;
+		void transaction(TransactionCallback callback) throws SQLException;
 	}
 
 	public static class ConnectionBuilder {
@@ -36,39 +30,20 @@ public class Db {
 			this.connectionString = connectionString;
 		}
 
-		public Connection with(Driver driver) throws Db.Err {
-			try {
-				java.sql.Connection connection = driver.connect(connectionString, null);
-				return new DbConnection(connection);
-			} catch (SQLException e) {
-				throw new Db.Err(e);
-			}
-		}
-	}
-
-	public static final class Err extends Exception {
-
-		private static final long serialVersionUID = 1L;
-
-		Err(Throwable cause) {
-			super(cause);
-		}
-
-		Err(String message) {
-			super(message);
+		public Connection with(Driver driver) throws SQLException {
+			java.sql.Connection connection = driver.connect(connectionString, null);
+			return new DbConnection(connection);
 		}
 	}
 
 	@FunctionalInterface
 	public interface VoidCallback {
-
 		void call(ResultSet rs) throws SQLException;
 	}
 
 	@FunctionalInterface
 	public interface TransactionCallback {
-
-		boolean call(Runner runner) throws Db.Err;
+		boolean call(Runner runner) throws SQLException;
 	}
 
 	private static class DbConnection implements Db.Connection {
@@ -76,59 +51,53 @@ public class Db {
 		private final java.sql.Connection connection;
 
 		DbConnection(java.sql.Connection connection) {
-			Objects.requireNonNull(connection, "Connection must not be null, check your connection string");
+			Objects.requireNonNull(connection,
+					"Connection must not be null, check your connection string");
 			this.connection = connection;
 		}
 
 		@Override
-		public void run(String sql) throws Db.Err {
-			Errors.rethrow(() -> {
-				try (final Statement statement = connection.createStatement()) {
-					statement.execute(sql);
-				}
-			}, Err::new);
+		public void run(String sql) throws SQLException {
+			try (final Statement statement = connection.createStatement()) {
+				statement.execute(sql);
+			}
 		}
 
 		@Override
-		public void query(String sql, Db.VoidCallback callback) throws Db.Err {
-			Errors.rethrow(() -> {
-				try (final Statement statement = connection.createStatement(); final ResultSet resultSet = statement.executeQuery(sql)) {
-					callback.call(resultSet);
-				}
-			}, Err::new);
+		public void query(String sql, Db.VoidCallback callback) throws SQLException {
+			try (final Statement statement = connection.createStatement();
+			     final ResultSet resultSet = statement.executeQuery(sql)) {
+				callback.call(resultSet);
+			}
 		}
 
 		@Override
-		public void transaction(Db.TransactionCallback callback) throws Db.Err {
-			Errors.rethrow(() -> {
-				try {
-					connection.setAutoCommit(false);
-					if (callback.call(this)) {
-						connection.commit();
-					} else {
-						connection.rollback();
-					}
-				} catch (SQLException | Db.Err | RuntimeException ex) {
+		public void transaction(Db.TransactionCallback callback) throws SQLException {
+			try {
+				connection.setAutoCommit(false);
+				if (callback.call(this)) {
+					connection.commit();
+				} else {
 					connection.rollback();
-					throw new Db.Err(ex);
-				} finally {
-					connection.setAutoCommit(true);
 				}
-			}, Err::new);
+			} catch (SQLException | RuntimeException ex) {
+				connection.rollback();
+				throw new SQLException(ex);
+			} finally {
+				connection.setAutoCommit(true);
+			}
 		}
 
 		@Override
-		public void one(String query, Db.VoidCallback callback) throws Db.Err {
-			Errors.rethrow(() -> {
-				try (final Statement statement = connection.createStatement()) {
-					ResultSet rs = statement.executeQuery(query);
-					if (rs.next()) {
-						callback.call(rs);
-						return;
-					}
-					throw new Db.Err("Query returned no results");
+		public void one(String sql, Db.VoidCallback callback) throws SQLException {
+			try (final Statement statement = connection.createStatement()) {
+				ResultSet rs = statement.executeQuery(sql);
+				if (rs.next()) {
+					callback.call(rs);
+					return;
 				}
-			}, Err::new);
+				throw new SQLException("Query returned no results");
+			}
 		}
 
 		@Override

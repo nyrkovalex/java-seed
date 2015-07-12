@@ -1,87 +1,83 @@
 java-seed
 =========
 
-Helper classes for java project jumpstart.
+Java boilerplate collection.
 
-Modules
--------
-Each module has its own `Seed` class used for static function and
-helper classes grouping and some specific stuff described below.
+Goal of this project is to create testable wrappers around standard java APIs
+and popular libraries.
 
-### Core
+## Why bother?
 
-#### `core.Seed`
-Contains general-purpose helper functions
+Many libraries including standard one have simple and beautiful APIs based on
+static functions. Those are very easy to use and discover. 
 
-Some more are probably coming
-
-
-#### `core.Chain`
-`Chain` is an abstraction of sequential process where each step is
-independent yet must be executed only if preceding step succeeds.
-
-`Chain` is composed of `Chain.Callable` implementing steps-functions,
-probably a lambda expressions. Each function expects no input and produces no output.
-
-If some step throws any `Exception` chain is terminated by throwing a
-`Chain.BrokenException` with original exception as its cause. `Chain.BrokenException`
-message can be more informative if broken step implementation overrides `toString()`
-method. In such case step's string representation will be included into
-`Chain.BrokenException` message
+_Let's see what's wrong with it..._
 
 ```java
-// Usage example
-
-public static void main(String... args) throws Flow.InterruptedException {
-  Chain.start(first::thing)
-      .then(() -> second.thing(someInput))
-      .then(last::thing())
-      .end();
-
-  // ...
+Path createFile(String fileName) throws IOException {
+	return Files.createFile(Paths.get(fileName)); // Very simple to use and read, right?
 }
 ```
 
-#### `core.Flow`
-`Flow` is an abstraction of a pipeline-like process where each step receives
-upstream step's output.
-
-`Flow` is composed of two kinds of steps: `Flow.Producer` step which must be a
-starting step of a `Flow` and `Flow.Processor` which represents all of the downstream steps
-
-`Flow.Producer`'s job is to produce some data which can be sequentially processed
-by downstream `Flow.Processor`'s therefore it recieves no input and returns an output
-of some kind
-
-`Flow.Processor`'s job is to do some job based on the input, optionally transform this input and
-pass some data further down the stream
-
+_OK, let's write a test for that function_
+   
 ```java
-// Usage example
-
-public static void main(String... args) throws Flow.InterruptedException {
-  ExecutionResult res = Flow
-      .start(() -> args)          // passes args array to the downstream step
-      .then(Main::parseArguments) // takes args parses them and returns Parameters object
-      .then(Main::initLogging)    // takes Parameters object sets logging up and passes Parameters object further
-      .then(Main::configuration)  // takes Parameters object, reads some defaults and constructs Configuration object
-      .then(Main::registerTasks)  // takes Configuration object and registers some tasks passing Configuration further
-      .then(Main::execute)        // takes Configuration object and runs some tasks producing ExecutionResult
-      .end();
-
-  // ...
+@Test
+public void testShouldCreateFile() throws Exception {
+	// ... wait, what are we going to check?
+	// We cannot mock static functions :(
+	// Maybe we can just hit the filesystem then?
+	// OK, that seems reasonable but in that case we'll have write proper tearDown()
+	// function to make sure we leave no garbage in the FS and that may fail anyway. 
+	// Smells bad...
+	// Besides what if we are going to test network IO? Database killer-sized queries?
 }
 ```
 
+_Not good at all... We need a coffee break here_
 
-### Test
+In my biased perfect world all libraries would have an API-object so user could mock
+them out for testing.
 
-#### `test.Seed.Test`
+_I'd like to see something like this_
 
-This class serves as a base class for all tests initializing mockito mocks in
-its `@Before` method and delegating its static `assertThat()` functions to corresponding
-`org.junit.Assert.assertThat()` function. This saves us from the necessity of explicit imports
-in each test.
+```java
+public class MyClass {
+	private final Fs fs; // Purists could make this dependency package-visible and test
+	                     // the public constructor
+	
+	public MyClass() {
+		this(Fs.instance());
+	}
+	
+	// We're going to use this constructor for testing
+	MyClass(Fs fs) {
+		this.fs = fs;
+	}
+	
+	Path createFile(String fileName) throws IOException {
+		return fs.createFile(Paths.get(fileName));
+	}
+}
 
-Some more delegations are probably coming like `org.hamcrest.CoreMatchers.is()` etc
+// Test class
+public class MyClassTest {
+	@Mock private Fs mockFs;
+	@InjectMocks private MyClass mc;
+	
+	@Before
+	public void setUp() {
+		MockitoAnnotations.init(this);
+	}
+	
+	@Test
+	public void testShouldCreateFile() throws Exception {
+		mc.createFile("foo");
+		verify(fs).createFile(Paths.get("foo));
+	}
+}
+```
 
+So this project is about such wrappers and a little more.
+
+_Detailed description to come_
